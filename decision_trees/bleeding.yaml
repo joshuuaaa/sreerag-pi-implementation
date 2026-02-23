@@ -1,0 +1,129 @@
+# decision_trees/bleeding.yaml
+
+tree_id: "bleeding_protocol"
+version: "2.0"
+description: "Bleeding emergency protocol"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Is the person conscious and responsive?"
+    options:
+      - response_match: ["yes", "conscious", "awake", "responsive", "alert"]
+        next: "assess_severity"
+      - response_match: ["no", "unconscious", "not responsive", "passed out"]
+        next: "escalate_unconscious"
+        
+  assess_severity:
+    id: "assess_severity"
+    type: "question"
+    question: "How severe is the bleeding? Is it spurting, flowing steadily, or just oozing?"
+    options:
+      - response_match: ["spurting", "severe", "lots", "won't stop", "heavy", "gushing"]
+        next: "severe_bleeding"
+      - response_match: ["steady", "moderate", "flowing", "medium"]
+        next: "moderate_bleeding"
+      - response_match: ["light", "minor", "oozing", "small", "little"]
+        next: "minor_bleeding"
+        
+  severe_bleeding:
+    id: "severe_bleeding"
+    type: "instruction"
+    instruction: "Apply FIRM, DIRECT pressure with a clean cloth immediately. Do not remove it even if blood soaks through."
+    rag_tags: ["severe_bleeding", "pressure_application", "shock_prevention"]
+    next: "check_pressure"
+    critical: true
+    
+  check_pressure:
+    id: "check_pressure"
+    type: "question"
+    question: "Are you applying firm pressure now? Tell me when it's in place."
+    options:
+      - response_match: ["yes", "done", "doing it", "applying", "pressing"]
+        next: "monitor_bleeding"
+      - response_match: ["no", "can't", "nothing to use"]
+        next: "find_materials"
+        
+  monitor_bleeding:
+    id: "monitor_bleeding"
+    type: "instruction"
+    instruction: "Good. Keep steady pressure for at least 10 minutes without checking. If blood soaks through, add another cloth on top. Do NOT remove the first one."
+    next: "check_slowing"
+    
+  check_slowing:
+    id: "check_slowing"
+    type: "question"
+    question: "After a few minutes, is the bleeding slowing down at all?"
+    options:
+      - response_match: ["yes", "slowing", "better", "less"]
+        next: "continue_pressure"
+      - response_match: ["no", "still bad", "not stopping", "worse"]
+        next: "escalate_severe"
+        
+  moderate_bleeding:
+    id: "moderate_bleeding"
+    type: "instruction"
+    instruction: "Apply steady pressure with a clean cloth. Elevate the injured area above the heart if possible."
+    rag_tags: ["moderate_bleeding", "elevation"]
+    next: "moderate_monitor"
+    
+  minor_bleeding:
+    id: "minor_bleeding"
+    type: "instruction"
+    instruction: "Clean the wound gently with clean water, apply pressure with a clean cloth, then bandage once bleeding stops."
+    rag_tags: ["minor_bleeding", "wound_care"]
+    next: "wound_care"
+    
+  escalate_unconscious:
+    id: "escalate_unconscious"
+    type: "escalate"
+    message: "⚠️ CALL EMERGENCY SERVICES NOW! The person is unconscious. After calling, I'll guide you through CPR if needed."
+    critical: true
+    
+  escalate_severe:
+    id: "escalate_severe"
+    type: "escalate"
+    message: "⚠️ This is life-threatening. CALL 911 IMMEDIATELY. Keep pressure on the wound while you call."
+    critical: true
+    
+  find_materials:
+    id: "find_materials"
+    type: "instruction"
+    instruction: "Use any clean cloth - towel, shirt, scarf. If nothing is available, use your bare hands. Apply firm pressure directly on the wound."
+    next: "check_pressure"
+    
+  continue_pressure:
+    id: "continue_pressure"
+    type: "instruction"
+    instruction: "Excellent. Continue pressure until bleeding fully stops or help arrives. Keep the person warm and calm."
+    terminal: true
+    
+  moderate_monitor:
+    id: "moderate_monitor"
+    type: "question"
+    question: "Is the bleeding under control now?"
+    options:
+      - response_match: ["yes", "stopped", "under control"]
+        next: "bandage_wound"
+      - response_match: ["no", "still bleeding"]
+        next: "increase_pressure"
+        
+  wound_care:
+    id: "wound_care"
+    type: "instruction"
+    instruction: "Once bleeding stops, apply antibiotic ointment if available and cover with a clean bandage. Watch for signs of infection."
+    terminal: true
+    
+  bandage_wound:
+    id: "bandage_wound"
+    type: "instruction"
+    instruction: "Apply a bandage firmly but not too tight. Keep the area elevated and watch for swelling or renewed bleeding."
+    terminal: true
+    
+  increase_pressure:
+    id: "increase_pressure"
+    type: "instruction"
+    instruction: "Press harder and consider adding another cloth on top. If bleeding continues after 10 minutes of firm pressure, call for medical help."
+    next: "moderate_monitor"
+

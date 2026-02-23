@@ -1,0 +1,48 @@
+# configs/pi_production.yaml
+
+app:
+  name: "Crisis Assistant"
+  version: "2.0"
+  prompt_style: "warm"
+
+hardware:
+  button_pin: 17
+  lcd_type: "i2c"
+  lcd_address: 0x27
+  lcd_cols: 16
+  lcd_rows: 2
+
+audio:
+  sample_rate: 16000
+  channels: 1
+  chunk_size: 1024
+  mic_device: null
+  speaker_device: null
+
+whisper:
+  model_path: "/home/pi/models/ggml-tiny.en.bin"
+  binary_path: "/home/pi/whisper.cpp/main"
+  language: "en"
+  
+piper:
+  model_path: "/home/pi/models/en_US-lessac-medium.onnx"
+  binary_path: "/home/pi/piper/piper"
+
+llm:
+  model_path: "/home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf"
+  n_ctx: 4096
+  n_threads: 4
+  temperature: 0.7
+  max_tokens: 150
+
+rag:
+  index_path: "data/index"
+  embedding_model: "BAAI/bge-small-en-v1.5"
+  top_k: 3
+
+decision:
+  tree_dir: "decision_trees"
+  
+logging:
+  level: "INFO"
+  file: "logs/crisis_assistant.log"

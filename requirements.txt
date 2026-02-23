@@ -1,0 +1,23 @@
+# requirements.txt
+
+# LLM
+llama-cpp-python==0.2.27
+
+# RAG & Embeddings
+faiss-cpu==1.7.4
+sentence-transformers==2.2.2
+
+# Configuration
+PyYAML==6.0.1
+
+# Hardware (Pi only)
+RPi.GPIO==0.7.1
+RPLCD==1.9.1
+
+# Audio
+pyaudio==0.2.13
+soundfile==0.12.1
+numpy==1.24.3
+
+# Utilities
+python-Levenshtein==0.21.1
