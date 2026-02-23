@@ -1,0 +1,142 @@
+# decision_trees/shock.yaml
+
+tree_id: "shock_protocol"
+version: "2.0"
+description: "Shock and severe allergic reaction (anaphylaxis) protocol"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "What caused this — an injury with blood loss, a severe allergic reaction, or unknown cause?"
+    critical: true
+    options:
+      - response_match: ["injury", "blood loss", "bleeding", "trauma", "accident", "fell", "cut"]
+        next: "hypovolemic_shock"
+      - response_match: ["allergy", "allergic", "bee sting", "nut", "shellfish", "food", "medication", "swelling", "hives"]
+        next: "anaphylaxis"
+      - response_match: ["unknown", "just collapsed", "no reason", "suddenly", "sick", "ill"]
+        next: "assess_shock_signs"
+
+  assess_shock_signs:
+    id: "assess_shock_signs"
+    type: "question"
+    question: "Describe the person — is their skin pale or gray, are they sweating, confused, or breathing fast?"
+    options:
+      - response_match: ["pale", "gray", "sweating", "confused", "fast breathing", "cold", "clammy", "weak pulse"]
+        next: "shock_general"
+      - response_match: ["normal", "talking", "alert", "breathing fine", "pink"]
+        next: "monitor_closely"
+
+  hypovolemic_shock:
+    id: "hypovolemic_shock"
+    type: "instruction"
+    instruction: "Control any external bleeding immediately with direct firm pressure. Then lay the person flat and raise their legs 6–12 inches using a rolled blanket or pillows. Cover them with a blanket to prevent heat loss."
+    rag_tags: ["shock", "bleeding", "pressure_application"]
+    next: "check_shock_progress"
+    critical: true
+
+  check_shock_progress:
+    id: "check_shock_progress"
+    type: "question"
+    question: "Is the person still conscious and responding to you? Has the bleeding slowed?"
+    options:
+      - response_match: ["yes", "conscious", "responding", "talking", "bleeding slowing"]
+        next: "shock_maintain"
+      - response_match: ["no", "unconscious", "not responding", "bleeding bad", "worse"]
+        next: "escalate_shock"
+
+  shock_maintain:
+    id: "shock_maintain"
+    type: "instruction"
+    instruction: "Good. Keep them lying flat with legs raised. Keep them warm and calm. Do NOT give food or water. Talk to them continuously to monitor consciousness. 911 is on the way."
+    rag_tags: ["shock"]
+    next: "monitor_shock"
+
+  monitor_shock:
+    id: "monitor_shock"
+    type: "question"
+    question: "Is their level of responsiveness staying the same, or are they becoming more confused or sleepy?"
+    options:
+      - response_match: ["same", "stable", "talking", "conscious", "okay"]
+        next: "await_ems"
+      - response_match: ["worse", "confused", "sleepy", "less responsive", "not answering", "drifting"]
+        next: "escalate_shock"
+
+  shock_general:
+    id: "shock_general"
+    type: "instruction"
+    instruction: "Lay the person flat immediately. Raise their legs if there is no leg injury or difficulty breathing. Cover with a blanket — do not let them get cold. Call 911 if not already done."
+    rag_tags: ["shock"]
+    next: "check_shock_progress"
+    critical: true
+
+  anaphylaxis:
+    id: "anaphylaxis"
+    type: "question"
+    question: "Does the person have an epinephrine auto-injector (EpiPen) available?"
+    critical: true
+    options:
+      - response_match: ["yes", "epipen", "auto-injector", "epinephrine", "they have one"]
+        next: "administer_epi"
+      - response_match: ["no", "don't have", "unavailable", "can't find"]
+        next: "anaphylaxis_no_epi"
+
+  administer_epi:
+    id: "administer_epi"
+    type: "instruction"
+    instruction: "Use the EpiPen NOW — inject into the outer mid-thigh (through clothing is fine). Hold firmly for 10 full seconds. Then call 911 immediately. A second dose may be needed after 5–15 minutes if symptoms continue."
+    rag_tags: ["shock", "anaphylaxis"]
+    next: "post_epi"
+    critical: true
+
+  post_epi:
+    id: "post_epi"
+    type: "question"
+    question: "After the EpiPen: is the person breathing better? Is the throat/tongue swelling reducing?"
+    options:
+      - response_match: ["yes", "better", "breathing", "improving", "calmer"]
+        next: "post_epi_monitoring"
+      - response_match: ["no", "worse", "still swelling", "can't breathe", "unconscious"]
+        next: "second_epi"
+
+  second_epi:
+    id: "second_epi"
+    type: "instruction"
+    instruction: "Use a second EpiPen if available. Call 911 immediately if not done. Keep the person lying flat. Begin CPR if they stop breathing. Anaphylaxis can be biphasic — hospital care is essential even if improving."
+    rag_tags: ["shock", "anaphylaxis", "cpr"]
+    next: "escalate_shock"
+    critical: true
+
+  post_epi_monitoring:
+    id: "post_epi_monitoring"
+    type: "instruction"
+    instruction: "Even with improvement after EpiPen, call 911 or go to emergency room immediately. Anaphylaxis can return stronger within hours (biphasic reaction). Keep them lying flat, legs raised, and warm until help arrives."
+    rag_tags: ["shock", "anaphylaxis"]
+    terminal: true
+
+  anaphylaxis_no_epi:
+    id: "anaphylaxis_no_epi"
+    type: "escalate"
+    message: "CALL 911 IMMEDIATELY — severe allergic reaction without epinephrine is life-threatening. Lay them flat, raise legs if no breathing difficulty. If they stop breathing, begin CPR. Do NOT give antihistamines — they are not fast enough."
+    critical: true
+
+  await_ems:
+    id: "await_ems"
+    type: "instruction"
+    instruction: "Maintain their position and keep them warm and calm. Monitor their pulse and breathing. Do NOT give food or drink. Update 911 dispatch with any changes in condition as you wait."
+    rag_tags: ["shock"]
+    terminal: true
+
+  monitor_closely:
+    id: "monitor_closely"
+    type: "instruction"
+    instruction: "Watch them closely every 2 minutes. Check pulse, breathing rate, and skin color. Any deterioration — pallor, confusion, rapid breathing — means shock is developing. Call me back or call 911 immediately."
+    rag_tags: ["shock"]
+    terminal: true
+
+  escalate_shock:
+    id: "escalate_shock"
+    type: "escalate"
+    message: "CALL 911 IMMEDIATELY if not done. This person is in decompensated shock — keep them flat, warm, and still. If they stop breathing, begin CPR. Update dispatch continuously."
+    critical: true

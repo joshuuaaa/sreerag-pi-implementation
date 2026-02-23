@@ -206,54 +206,53 @@ class IntelligentOrchestrator:
             "state": "guiding"
         }
         
-    def _generate_response(self, user_message: str, decision_guidance: str, 
+    def _generate_response(self, user_message: str, decision_guidance: str,
                           rag_context: str, analysis: Dict) -> str:
-        """Generate LLM response with full context"""
-        
-        # Build conversation history
-        history_text = ""
-        if self.current_session:
-            recent = self.current_session.get_context(last_n=3)
-            history_text = "\n".join([
-                f"{msg['role'].upper()}: {msg['content']}"
-                for msg in recent
-            ])
-        
-        # Build prompt
-        primary = analysis.get("primary_condition", "emergency")
+        """Generate LLM response using Phi-3 chat interface."""
+
+        primary  = analysis.get("primary_condition", "emergency")
         severity = ""
         if analysis.get("conditions"):
             severity = analysis["conditions"][0].get("severity", "")
-            
-        prompt = f"""{self.system_prompt}
 
-SITUATION:
-- Emergency type: {primary}
-- Severity: {severity}
-- Patient conscious: {analysis['context'].get('patient_conscious', 'unknown')}
+        conscious = analysis["context"].get("patient_conscious", "unknown")
 
-RECENT CONVERSATION:
-{history_text if history_text else 'First interaction'}
+        # Build structured user message for the current turn
+        context_block = (
+            f"Emergency type: {primary}\n"
+            f"Severity: {severity}\n"
+            f"Patient conscious: {conscious}\n\n"
+        )
 
-USER JUST SAID: {user_message}
+        if rag_context:
+            context_block += f"Medical reference:\n{rag_context}\n\n"
 
-PROTOCOL GUIDANCE:
-{decision_guidance}
+        context_block += (
+            f"Recommended protocol step:\n{decision_guidance}\n\n"
+            f"User said: {user_message}"
+        )
 
-MEDICAL REFERENCE:
-{rag_context if rag_context else 'No additional reference'}
+        # Assemble chat history (last 3 turns) + current user turn
+        messages = []
+        if self.current_session:
+            for msg in self.current_session.get_context(last_n=3):
+                messages.append({"role": msg["role"], "content": msg["content"]})
 
-Provide your response (under 40 words, calm and clear):
+        # Replace last user message with enriched context version
+        if messages and messages[-1]["role"] == "user":
+            messages[-1]["content"] = context_block
+        else:
+            messages.append({"role": "user", "content": context_block})
 
-RESPONSE:"""
+        response = self.llm.generate_chat(
+            system_prompt=self.system_prompt,
+            messages=messages,
+            max_tokens=100,
+        )
 
-        # Generate with LLM
-        response = self.llm.generate(prompt, max_tokens=100)
-        
-        # Fallback if empty
         if not response or len(response.strip()) < 5:
             response = decision_guidance
-            
+
         return response
         
     def _is_critical(self, analysis: Dict) -> bool:

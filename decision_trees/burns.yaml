@@ -1,0 +1,115 @@
+# decision_trees/burns.yaml
+
+tree_id: "burn_protocol"
+version: "2.0"
+description: "Burn injury emergency protocol"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "What caused the burn — heat or flame, scalding liquid, chemical, or electrical?"
+    options:
+      - response_match: ["heat", "flame", "fire", "hot", "stove", "oven", "grill", "iron", "lighter"]
+        next: "assess_depth"
+      - response_match: ["scald", "scalding", "boiling", "hot water", "steam", "liquid"]
+        next: "assess_depth"
+      - response_match: ["chemical", "acid", "bleach", "cleaner", "caustic", "lye", "battery"]
+        next: "chemical_burn"
+      - response_match: ["electric", "electrical", "shocked", "outlet", "lightning", "wire"]
+        next: "electrical_burn"
+
+  assess_depth:
+    id: "assess_depth"
+    type: "question"
+    question: "Describe the burn area — is the skin red, are there blisters, or does the skin look white, brown, or charred?"
+    options:
+      - response_match: ["red", "pink", "no blister", "sore"]
+        next: "first_degree"
+      - response_match: ["blister", "blistering", "wet", "shiny", "fluid"]
+        next: "second_degree_check"
+      - response_match: ["white", "brown", "black", "charred", "leather", "dry", "painless in center"]
+        next: "third_degree"
+
+  first_degree:
+    id: "first_degree"
+    type: "instruction"
+    instruction: "Run cool (not cold) water over the burn for at least 20 minutes immediately. Then cover with a clean non-stick dressing. Do NOT use ice, butter, or toothpaste."
+    rag_tags: ["burns", "first_degree", "cooling"]
+    next: "first_degree_followup"
+
+  first_degree_followup:
+    id: "first_degree_followup"
+    type: "question"
+    question: "Is the burn larger than the person's hand, or is it on the face, hands, feet, or genitals?"
+    options:
+      - response_match: ["yes", "large", "face", "hands", "feet", "genitals", "big"]
+        next: "escalate_burn"
+      - response_match: ["no", "small", "minor", "arm", "leg", "back"]
+        next: "minor_burn_care"
+
+  second_degree_check:
+    id: "second_degree_check"
+    type: "instruction"
+    instruction: "Start cooling immediately — run cool water over the burn for at least 20 minutes. Do NOT pop the blisters. While cooling, I need to assess severity."
+    rag_tags: ["burns", "second_degree", "cooling"]
+    next: "second_degree_size"
+    critical: true
+
+  second_degree_size:
+    id: "second_degree_size"
+    type: "question"
+    question: "How large is the burned area — smaller than the victim's palm, or larger?"
+    options:
+      - response_match: ["large", "bigger", "more", "lots", "arm", "leg", "whole", "multiple"]
+        next: "escalate_burn"
+      - response_match: ["small", "little", "palm", "patch", "finger", "minor"]
+        next: "second_degree_care"
+
+  second_degree_care:
+    id: "second_degree_care"
+    type: "instruction"
+    instruction: "After 20 minutes of cooling: cover loosely with a sterile non-stick dressing or cling wrap laid lengthwise. Do NOT wrap tightly. Keep them warm — burn victims lose heat fast. Seek medical evaluation today."
+    rag_tags: ["burns", "second_degree", "wound_care"]
+    terminal: true
+
+  third_degree:
+    id: "third_degree"
+    type: "escalate"
+    message: "CALL 911 IMMEDIATELY. This is a serious full-thickness burn. Do NOT remove clothing stuck to the burn. Cover loosely with a clean dry cloth and keep the person warm and still until help arrives."
+    critical: true
+
+  chemical_burn:
+    id: "chemical_burn"
+    type: "instruction"
+    instruction: "IMPORTANT: Do NOT touch the chemical with bare hands. Brush off any dry chemical first. Then flush with large amounts of cool water for at least 20 minutes. Remove contaminated clothing carefully."
+    rag_tags: ["burns", "chemical_burn"]
+    next: "chemical_followup"
+    critical: true
+
+  chemical_followup:
+    id: "chemical_followup"
+    type: "instruction"
+    instruction: "Continue flushing for the full 20 minutes — this cannot be shortened. For eye exposure, keep the eye open and flush with water. Call 911 for all chemical burns and tell them what chemical was involved."
+    rag_tags: ["burns", "chemical_burn"]
+    next: "escalate_burn"
+    critical: true
+
+  electrical_burn:
+    id: "electrical_burn"
+    type: "escalate"
+    message: "CALL 911 NOW. First: ensure the person is NOT still in contact with the electricity source — do NOT touch them until power is off. Electrical burns cause massive internal damage. Be ready to perform CPR."
+    critical: true
+
+  minor_burn_care:
+    id: "minor_burn_care"
+    type: "instruction"
+    instruction: "After cooling: gently clean with soap and water, apply antibiotic ointment, and cover with a non-stick bandage. Change the dressing daily. Watch for signs of infection: spreading redness, swelling, or pus."
+    rag_tags: ["burns", "wound_care", "first_degree"]
+    terminal: true
+
+  escalate_burn:
+    id: "escalate_burn"
+    type: "escalate"
+    message: "This burn requires emergency medical care. Call 911 or go to the emergency room now. While waiting: keep cooling if just applied, cover loosely, keep person warm, and monitor breathing."
+    critical: true

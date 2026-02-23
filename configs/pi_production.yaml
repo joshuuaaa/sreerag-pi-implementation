@@ -1,4 +1,5 @@
 # configs/pi_production.yaml
+# Production configuration for Raspberry Pi 5 deployment
 
 app:
   name: "Crisis Assistant"
@@ -16,33 +17,34 @@ audio:
   sample_rate: 16000
   channels: 1
   chunk_size: 1024
-  mic_device: null
-  speaker_device: null
+  mic_device: null       # null = auto-detect first USB mic
+  speaker_device: null   # null = default ALSA output
 
 whisper:
-  model_path: "/home/pi/models/ggml-tiny.en.bin"
-  binary_path: "/home/pi/whisper.cpp/main"
+  model_path: "/home/pi/crisis-assistant/models/whisper/ggml-tiny.en.bin"
+  binary_path: "/home/pi/crisis-assistant/models/whisper/whisper-cpp/main"
   language: "en"
-  
+
 piper:
-  model_path: "/home/pi/models/en_US-lessac-medium.onnx"
-  binary_path: "/home/pi/piper/piper"
+  model_path: "/home/pi/crisis-assistant/models/piper/en_US-lessac-medium.onnx"
+  binary_path: "/home/pi/crisis-assistant/models/piper/piper/build/piper"
 
 llm:
-  model_path: "/home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf"
+  model_path: "/home/pi/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf"
   n_ctx: 4096
-  n_threads: 4
+  n_threads: 4           # Pi 5 has 4 cores; use all for inference
+  n_gpu_layers: 0        # CPU-only; set >0 if you add a GPU accelerator
   temperature: 0.7
   max_tokens: 150
 
 rag:
-  index_path: "data/index"
+  index_path: "/home/pi/crisis-assistant/data/index"
   embedding_model: "BAAI/bge-small-en-v1.5"
   top_k: 3
 
 decision:
-  tree_dir: "decision_trees"
-  
+  tree_dir: "/home/pi/crisis-assistant/decision_trees"
+
 logging:
   level: "INFO"
-  file: "logs/crisis_assistant.log"
+  file: "/home/pi/crisis-assistant/logs/crisis_assistant.log"

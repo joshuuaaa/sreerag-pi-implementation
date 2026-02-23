@@ -1,0 +1,161 @@
+# decision_trees/fracture.yaml
+
+tree_id: "fracture_protocol"
+version: "2.0"
+description: "Fracture and musculoskeletal injury protocol"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Which part of the body is injured — arm, leg, spine, or elsewhere?"
+    options:
+      - response_match: ["arm", "wrist", "forearm", "elbow", "hand"]
+        next: "arm_fracture"
+      - response_match: ["leg", "shin", "ankle", "knee", "foot", "thigh", "femur", "hip"]
+        next: "leg_check"
+      - response_match: ["spine", "back", "neck", "spinal", "vertebra", "cannot move"]
+        next: "spinal_caution"
+      - response_match: ["rib", "chest", "collarbone", "shoulder", "pelvis"]
+        next: "assess_open"
+
+  arm_fracture:
+    id: "arm_fracture"
+    type: "question"
+    question: "Is this an open fracture — can you see bone or does bone penetrate the skin?"
+    options:
+      - response_match: ["yes", "open", "bone showing", "bone sticking out", "through the skin"]
+        next: "open_fracture"
+      - response_match: ["no", "closed", "intact", "skin intact"]
+        next: "arm_immobilise"
+
+  arm_immobilise:
+    id: "arm_immobilise"
+    type: "instruction"
+    instruction: "Support the injured arm in the position most comfortable to the person. Apply a sling using a triangular bandage or folded cloth. Add padding around any obviously deformed area. Apply ice wrapped in cloth. Do NOT try to straighten the arm."
+    rag_tags: ["fracture", "splint", "arm"]
+    next: "check_csm_arm"
+
+  check_csm_arm:
+    id: "check_csm_arm"
+    type: "question"
+    question: "Ask the person: can they feel their fingers normally? Are fingers warm and pink? Can they wiggle fingers slightly?"
+    options:
+      - response_match: ["yes", "feels normal", "can feel", "warm", "moving"]
+        next: "seek_care"
+      - response_match: ["no", "numb", "cold", "blue", "can't feel", "tingling", "pale"]
+        next: "escalate_csm"
+
+  leg_check:
+    id: "leg_check"
+    type: "question"
+    question: "Is it the thigh (upper leg) that is injured, or the lower leg, knee, or ankle?"
+    options:
+      - response_match: ["thigh", "upper leg", "femur", "hip", "groin"]
+        next: "femur_fracture"
+      - response_match: ["lower", "shin", "tibia", "fibula", "ankle", "foot", "knee"]
+        next: "leg_immobilise"
+
+  femur_fracture:
+    id: "femur_fracture"
+    type: "escalate"
+    message: "A thigh bone fracture is a serious emergency — it can cause dangerous internal bleeding. Call 911 immediately. Lay the person flat, keep them warm, and do NOT let them stand or walk. Watch for signs of shock: pale skin, rapid breathing, confusion."
+    critical: true
+
+  leg_immobilise:
+    id: "leg_immobilise"
+    type: "instruction"
+    instruction: "Lay the person down. Pad and stabilise the leg in the position found — use rolled clothing or a folded blanket around it. Secure above and below the fracture site. Do NOT allow weight-bearing. Apply ice wrapped in cloth."
+    rag_tags: ["fracture", "splint", "leg", "elevation"]
+    next: "check_csm_leg"
+
+  check_csm_leg:
+    id: "check_csm_leg"
+    type: "question"
+    question: "Can the person feel and wiggle their toes? Is the foot warm and a normal color?"
+    options:
+      - response_match: ["yes", "can feel", "warm", "normal", "pink", "moving"]
+        next: "seek_care"
+      - response_match: ["no", "numb", "cold", "blue", "can't feel", "pale", "white"]
+        next: "escalate_csm"
+
+  spinal_caution:
+    id: "spinal_caution"
+    type: "instruction"
+    instruction: "DO NOT move the person. A spinal injury must be excluded before any movement. Keep them completely still. Support their head and neck in the position found if they are moving. Call 911 if not done."
+    rag_tags: ["fracture", "spinal", "immobilisation"]
+    next: "spinal_symptoms"
+    critical: true
+
+  spinal_symptoms:
+    id: "spinal_symptoms"
+    type: "question"
+    question: "Does the person have any tingling, numbness, weakness, or inability to move their hands or feet?"
+    options:
+      - response_match: ["yes", "can't move", "numb", "tingling", "weak", "paralysis", "no feeling"]
+        next: "escalate_spinal"
+      - response_match: ["no", "normal", "moving", "feeling okay", "no numbness"]
+        next: "spinal_precaution_hold"
+
+  spinal_precaution_hold:
+    id: "spinal_precaution_hold"
+    type: "instruction"
+    instruction: "Even without symptoms, keep them still and call 911 — spinal fractures require imaging to rule out. Keep them warm. Talk to them calmly. Do NOT give anything to eat or drink."
+    rag_tags: ["fracture", "spinal"]
+    terminal: true
+
+  escalate_spinal:
+    id: "escalate_spinal"
+    type: "escalate"
+    message: "Possible spinal cord injury. CALL 911 NOW. Do NOT move the person under any circumstances. Hold their head still, support it gently in line with their body. Keep them warm and conscious."
+    critical: true
+
+  open_fracture:
+    id: "open_fracture"
+    type: "instruction"
+    instruction: "Do NOT push the bone back in. Cover the wound and exposed bone with a moist sterile dressing or clean wet cloth — do NOT use dry fluffy material. Control surrounding bleeding with gentle pressure around (not on) the wound. Immobilise in position found and call 911."
+    rag_tags: ["fracture", "open_fracture", "wound_care", "bleeding"]
+    next: "escalate_open"
+    critical: true
+
+  escalate_open:
+    id: "escalate_open"
+    type: "escalate"
+    message: "Open fractures carry high risk of bone infection. Emergency medical care is required. Call 911 and keep the wound covered and the limb still. Do not allow weight-bearing."
+    critical: true
+
+  assess_open:
+    id: "assess_open"
+    type: "question"
+    question: "Is there any difficulty breathing or chest pain along with the injury?"
+    options:
+      - response_match: ["yes", "can't breathe", "chest pain", "short of breath", "painful breathing"]
+        next: "rib_respiratory"
+      - response_match: ["no", "breathing fine", "normal", "no chest pain"]
+        next: "immobilise_other"
+
+  rib_respiratory:
+    id: "rib_respiratory"
+    type: "escalate"
+    message: "Rib fractures with breathing difficulty can indicate lung injury. Call 911 immediately. Sit the person upright or at 45 degrees — this makes breathing easier. Do not wrap or bandage the chest tightly."
+    critical: true
+
+  immobilise_other:
+    id: "immobilise_other"
+    type: "instruction"
+    instruction: "Support the injured area in the most comfortable position. Apply ice wrapped in cloth. For collarbone or shoulder: apply a broad arm sling. Seek medical evaluation — imaging is needed. Do NOT return to physical activity."
+    rag_tags: ["fracture", "splint"]
+    next: "seek_care"
+
+  seek_care:
+    id: "seek_care"
+    type: "instruction"
+    instruction: "The fracture is stabilised. Go to the emergency room for X-ray and definitive treatment. Keep the limb elevated and apply ice regularly (20 minutes on, 20 minutes off). Do NOT give aspirin to children."
+    rag_tags: ["fracture"]
+    terminal: true
+
+  escalate_csm:
+    id: "escalate_csm"
+    type: "escalate"
+    message: "Loss of circulation, sensation, or movement below a fracture is a vascular emergency. Call 911 immediately. Do NOT reposition the limb — keep it absolutely still and wait for emergency services."
+    critical: true

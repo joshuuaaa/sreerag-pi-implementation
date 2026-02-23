@@ -1,0 +1,24 @@
+[Unit]
+Description=Crisis Assistant – Offline Emergency Guidance
+After=network.target sound.target
+Wants=sound.target
+
+[Service]
+Type=simple
+User=__PI_USER__
+WorkingDirectory=__APP_DIR__
+Environment="CRISIS_CONFIG=__APP_DIR__/configs/pi_production.yaml"
+ExecStart=__VENV_DIR__/bin/python __APP_DIR__/main.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:__APP_DIR__/logs/service.log
+StandardError=append:__APP_DIR__/logs/service.log
+
+# Give the LLM time to load on first start
+TimeoutStartSec=180
+
+# Ensure audio devices are accessible
+SupplementaryGroups=audio gpio i2c
+
+[Install]
+WantedBy=multi-user.target

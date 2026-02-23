@@ -1,0 +1,134 @@
+SHOCK – FIRST AID REFERENCE
+
+OVERVIEW
+Shock is a life-threatening condition where the circulatory system fails to deliver sufficient oxygen to the body's organs and tissues. Without treatment, shock progresses to organ failure and death. It is a common complication of serious injuries and medical events.
+
+TYPES OF SHOCK
+
+Hypovolemic Shock (most common in trauma)
+Caused by significant fluid loss: blood loss (haemorrhagic shock), severe dehydration, severe burns.
+Primary treatment: control bleeding, IV fluids (medical), lay flat with legs elevated.
+
+Cardiogenic Shock
+Heart pump failure: heart attack, severe heart failure, cardiac tamponade.
+Primary treatment: emergency cardiac care.
+
+Distributive Shock
+Abnormal vasodilation: septic shock (severe infection), anaphylactic shock (severe allergic reaction), neurogenic shock (spinal cord injury).
+Anaphylaxis requires immediate epinephrine (EpiPen).
+
+Obstructive Shock
+Physical obstruction to blood flow: tension pneumothorax, pulmonary embolism, cardiac tamponade.
+Requires emergency medical intervention.
+
+RECOGNISING SHOCK – EARLY AND LATE SIGNS
+
+Early Signs (Compensated Shock)
+- Restlessness, anxiety, feeling "something is wrong"
+- Mildly rapid heart rate (>100 bpm)
+- Pale skin beginning
+- Mildly increased respiratory rate
+- Cool, slightly clammy skin
+
+Late Signs (Decompensated – Critical)
+- Pale, grey, blue-tinged skin, lips, fingernails (cyanosis)
+- Cold, clammy, sweaty skin all over body
+- Rapid, weak, thready pulse (too fast to count easily)
+- Rapid, shallow breathing
+- Significant confusion, disorientation, or combativeness
+- Extreme thirst (major sign of blood loss)
+- Nausea and vomiting
+- Weakness, feeling faint, or actual fainting
+- Decreased responsiveness or unconsciousness
+- Blood pressure dropping (difficult to assess without equipment)
+
+MNEMONIC – SHOCK SIGNS: Pallor, Perspiration, Prostration (collapse), Pulselessness (weak), Rapid breathing
+
+GENERAL SHOCK FIRST AID
+
+STEP 1 – CALL 911 IMMEDIATELY
+Shock is always a medical emergency. Do not delay calling.
+
+STEP 2 – TREAT THE CAUSE IF POSSIBLE
+Control external bleeding (direct pressure, tourniquet).
+For anaphylaxis: administer epinephrine auto-injector if available.
+Do NOT delay treating the cause.
+
+STEP 3 – POSITION
+Standard: Lay person flat on back.
+Legs elevation: Raise legs 6–12 inches (30 cm) using a folded blanket, pillow, or rolled clothing. This shifts blood from lower extremities toward vital organs.
+EXCEPTIONS – Do NOT elevate legs if:
+- Head, neck, or spinal injury suspected
+- Breathing difficulty
+- Unconscious
+- Burns on legs
+- Fractures of legs
+
+For unresponsive person who is breathing: recovery position (on side).
+Pregnant person: tilt onto LEFT side to prevent compression of inferior vena cava.
+
+STEP 4 – MAINTAIN BODY TEMPERATURE
+Cover with blanket, coat, or any available material.
+Insulate from cold ground (place something beneath person too).
+Hypothermia worsens all types of shock significantly.
+Move out of wind, rain, or cold environment if possible without moving injured spine.
+Do NOT overheat – goal is prevent heat loss.
+
+STEP 5 – OXYGEN (if available)
+High-flow oxygen via non-rebreather mask significantly improves outcomes if oxygen is available.
+First aiders generally do not carry oxygen.
+
+STEP 6 – DO NOT GIVE FOOD OR FLUIDS
+Do NOT give anything by mouth to person in shock.
+Exception: anaphylaxis – follow up epinephrine with supine position and fluids supervised.
+Person may complain of intense thirst – reassure but do not give drinks.
+Reason: may require general anaesthesia, and aspiration is dangerous.
+
+STEP 7 – REASSURE AND MONITOR
+Speak calmly and continuously. Reassurance reduces anxiety, which reduces heart rate.
+Monitor: Pulse rate and quality. Respiratory rate and quality. Skin colour and temperature. Level of consciousness.
+Use AVPU scale: Alert, Voice (responds to voice), Pain (responds to pain only), Unresponsive.
+
+ANAPHYLACTIC SHOCK (Severe Allergic Reaction) – SPECIAL MANAGEMENT
+
+Triggers: bee stings, nuts, shellfish, medications, latex, exercise.
+Onset: typically within minutes of exposure.
+
+SIGNS OF ANAPHYLAXIS:
+- Skin: hives, flushing, swelling of face/lips/tongue/throat
+- Respiratory: stridor, wheezing, difficulty breathing, hoarse voice
+- Cardiovascular: rapid weak pulse, dizziness, fainting
+- Gastrointestinal: nausea, vomiting, cramping
+
+ANAPHYLAXIS TREATMENT:
+1. EPINEPHRINE FIRST (auto-injector/EpiPen): inject into outer mid-thigh, hold for 10 seconds.
+2. Call 911 immediately even after epinephrine – biphasic reactions can occur.
+3. Give second epinephrine dose after 5–15 minutes if symptoms persist.
+4. Lay person flat (unless breathing difficulty – then sitting upright preferred).
+5. CPR if cardiac arrest.
+6. Antihistamines are NOT a substitute for epinephrine in severe anaphylaxis.
+
+SEPTIC SHOCK
+From severe infection disseminating to bloodstream.
+Signs: fever or hypothermia + shock signs.
+First aid: supportive. Call 911. Keep warm. No specific field treatment.
+
+NEUROGENIC SHOCK (Spinal Cord Injury)
+Caused by: loss of sympathetic tone below injury level.
+Characteristics: warm, dry skin (paradoxically) despite shock state; bradycardia (slow heart rate).
+Specific first aid: immobilise spine, keep warm, call 911.
+Do NOT elevate legs if spinal injury suspected.
+
+PAEDIATRIC SHOCK
+Children compensate more effectively than adults but decompensate suddenly.
+Signs in children: mottled skin, prolonged capillary refill >2 seconds, abnormal mental status, weak central pulse.
+Normal heart rates in children are higher than adults – tachycardia threshold differs by age.
+Any child with shock signs: call 911 immediately.
+
+WHAT TO REPORT TO EMERGENCY SERVICES
+When calling emergency services, provide:
+1. What happened (mechanism: fall, car accident, allergic reaction, etc.)
+2. Signs of shock observed
+3. Any bleeding controlled
+4. Medications given (epinephrine, etc.)
+5. Time of injury and current symptoms

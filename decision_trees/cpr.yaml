@@ -1,0 +1,115 @@
+# decision_trees/cpr.yaml
+# Handles: cardiac arrest, unconscious/not-breathing, choking
+
+tree_id: "unconscious_protocol"
+version: "2.0"
+description: "Unconscious / cardiac arrest / choking emergency protocol"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Is the person conscious and responsive at all?"
+    critical: true
+    options:
+      - response_match: ["yes", "conscious", "awake", "responsive", "alert", "talking", "breathing"]
+        next: "conscious_breathing_check"
+      - response_match: ["no", "unconscious", "unresponsive", "not responding", "passed out", "collapsed"]
+        next: "check_breathing"
+
+  conscious_breathing_check:
+    id: "conscious_breathing_check"
+    type: "question"
+    question: "Is the person choking — unable to speak, cough, or breathe?"
+    options:
+      - response_match: ["yes", "choking", "can't breathe", "not breathing", "throat", "turning blue"]
+        next: "choking_conscious"
+      - response_match: ["no", "breathing", "can speak", "talking"]
+        next: "escalate_monitor"
+
+  check_breathing:
+    id: "check_breathing"
+    type: "instruction"
+    instruction: "Tap their shoulders hard and shout their name. Tilt their head back slightly and look, listen, and feel for breathing for 10 seconds. What do you observe?"
+    rag_tags: ["cpr", "cardiac", "unconscious"]
+    next: "breathing_response"
+    critical: true
+
+  breathing_response:
+    id: "breathing_response"
+    type: "question"
+    question: "Is the person breathing normally? Gasping alone does NOT count as breathing."
+    critical: true
+    options:
+      - response_match: ["yes", "breathing", "chest moving", "breaths"]
+        next: "recovery_position"
+      - response_match: ["no", "not breathing", "only gasping", "no breath", "nothing"]
+        next: "start_cpr_call"
+
+  start_cpr_call:
+    id: "start_cpr_call"
+    type: "escalate"
+    message: "CALL 911 NOW if not done. Start chest compressions immediately — place both hands on the center of their chest and push down hard and fast, 100-120 times per minute. Do not stop."
+    critical: true
+
+  recovery_position:
+    id: "recovery_position"
+    type: "instruction"
+    instruction: "The person is breathing but unconscious. Roll them onto their side — recovery position. Tilt their head back to keep airway open. Stay with them and monitor breathing until help arrives."
+    rag_tags: ["unconscious", "airway", "recovery_position"]
+    next: "monitor_breathing"
+
+  monitor_breathing:
+    id: "monitor_breathing"
+    type: "question"
+    question: "Is their breathing remaining stable? Any change in color or breathing pattern?"
+    options:
+      - response_match: ["yes", "stable", "breathing fine", "okay", "normal"]
+        next: "await_help"
+      - response_match: ["no", "stopped", "changed", "irregular", "blue", "not breathing"]
+        next: "start_cpr_call"
+
+  await_help:
+    id: "await_help"
+    type: "instruction"
+    instruction: "Good. Keep them on their side, head tilted back. Keep them warm with a blanket. Talk to them calmly. Monitor breathing every 30 seconds until emergency services arrive."
+    rag_tags: ["recovery_position", "unconscious"]
+    terminal: true
+
+  choking_conscious:
+    id: "choking_conscious"
+    type: "instruction"
+    instruction: "Stand behind them. Give 5 firm back blows between the shoulder blades with the heel of your hand. Then give 5 abdominal thrusts — fist just above their navel, pull sharply in and UP. Alternate until the object comes out."
+    rag_tags: ["choking", "airway", "heimlich"]
+    next: "choking_cleared"
+    critical: true
+
+  choking_cleared:
+    id: "choking_cleared"
+    type: "question"
+    question: "Is the object out? Can they breathe and speak now?"
+    options:
+      - response_match: ["yes", "out", "breathing", "coughing", "speaking", "cleared"]
+        next: "choking_resolved"
+      - response_match: ["no", "still", "can't breathe", "not out", "unconscious", "collapsed"]
+        next: "choking_unconscious"
+
+  choking_resolved:
+    id: "choking_resolved"
+    type: "instruction"
+    instruction: "The airway is clear. Encourage them to cough fully. Sit them down and keep them calm. Seek medical evaluation — abdominal thrusts can cause internal bruising."
+    terminal: true
+
+  choking_unconscious:
+    id: "choking_unconscious"
+    type: "escalate"
+    message: "Lower them carefully to the floor. Call 911. Begin CPR — look in mouth before each rescue breath and remove any visible object. Do NOT do blind finger sweeps."
+    critical: true
+
+  escalate_monitor:
+    id: "escalate_monitor"
+    type: "instruction"
+    instruction: "Keep them calm and still. Call 911 if not done. Monitor their breathing and pulse. Tell me if anything changes."
+    rag_tags: ["unconscious", "monitoring"]
+    terminal: false
+    next: "monitor_breathing"
