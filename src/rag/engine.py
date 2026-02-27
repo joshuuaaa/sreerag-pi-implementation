@@ -51,6 +51,8 @@ class RAGEngine:
     def __init__(self, config: dict):
         self.index_path      = config.get("index_path", "data/index")
         self.embedding_model = config.get("embedding_model", "BAAI/bge-small-en-v1.5")
+        self.model_path      = config.get("model_path", None)
+        self.local_files_only = bool(config.get("local_files_only", False))
         self.top_k           = config.get("top_k", 3)
 
         self._index:     Optional[Any]          = None   # faiss.Index
@@ -99,8 +101,22 @@ class RAGEngine:
 
         # Load embedding model (required on Pi for query vectorisation)
         try:
-            logger.info("Loading embedding model: %s", self.embedding_model)
-            self._encoder = SentenceTransformer(self.embedding_model)
+            model_source = self.model_path or self.embedding_model
+            if self.model_path and not os.path.exists(self.model_path):
+                logger.error("Configured RAG model_path does not exist: %s", self.model_path)
+                self._encoder = None
+                return
+
+            if self.local_files_only:
+                os.environ.setdefault("HF_HUB_OFFLINE", "1")
+                os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+            logger.info(
+                "Loading embedding model: %s (local_files_only=%s)",
+                model_source,
+                self.local_files_only,
+            )
+            self._encoder = SentenceTransformer(model_source)
             logger.info("✅ RAG engine ready (FAISS + sentence-transformers)")
         except Exception as e:
             logger.error("Failed to load embedding model: %s", e)
@@ -179,6 +195,8 @@ class RAGEngine:
             "total_documents":    len(self._documents),
             "index_vectors":      self._index.ntotal if self._index else 0,
             "embedding_model":    self.embedding_model,
+            "model_path":         self.model_path,
+            "local_files_only":   self.local_files_only,
             "faiss_available":    _FAISS_OK,
             "encoder_available":  self._encoder is not None,
         }

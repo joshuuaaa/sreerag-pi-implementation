@@ -36,6 +36,21 @@ python scripts/build_rag_index.py   # reads data/manuals/*.txt
 rsync -avz data/index/ pi@<PI_IP>:~/crisis-assistant/data/index/
 ```
 
+### 1b – Download embedding model once for offline RAG runtime
+
+```bash
+mkdir -p models/embeddings
+python - <<'PY'
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+model.save("models/embeddings/bge-small-en-v1.5")
+print("saved to models/embeddings/bge-small-en-v1.5")
+PY
+
+# copy to Pi (one-time)
+rsync -avz models/embeddings/ pi@<PI_IP>:~/crisis-assistant/models/embeddings/
+```
+
 ### 2 – Pi: one-shot setup
 
 ```bash
@@ -52,6 +67,12 @@ python main.py
 
 # Demo / dev mode (text input, no hardware needed)
 CRISIS_CONFIG=configs/dev.yaml python main.py
+
+# Force text-only mode (skip GPIO/LCD/mic/speaker init)
+CRISIS_CONFIG=configs/dev.yaml CRISIS_TEXT_ONLY=1 python main.py
+
+# Fully offline run (no Hugging Face network calls)
+HF_HUB_OFFLINE=1 CRISIS_CONFIG=configs/dev.yaml CRISIS_TEXT_ONLY=1 python main.py
 ```
 
 ### 4 – Run tests
@@ -101,4 +122,4 @@ models/
 | Hold | Start recording |
 | Release | Process and respond |
 | Triple press | Reset conversation |
-| 5 s hold | Safe shutdown |
+| Long hold | No power action |

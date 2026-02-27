@@ -1,0 +1,303 @@
+2026-02-24 22:39:53,756 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 22:39:53,758 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 22:39:53,759 [WARNING] main: AudioManager unavailable: No module named 'pyaudio'
+2026-02-24 22:39:53,825 [WARNING] main: Whisper STT unavailable: Whisper model not found: /home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin
+2026-02-24 22:39:54,202 [INFO] faiss.loader: Loading faiss.
+2026-02-24 22:39:54,344 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 22:40:02,613 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 22:40:02,614 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 22:40:30,288 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 22:40:30,288 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 22:40:30,300 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 22:40:30,300 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 22:40:30,300 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 22:40:30,936 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 22:40:30,941 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 22:40:33,257 [INFO] main: Session started
+2026-02-24 22:40:33,257 [INFO] main: Button-gated text mode: mic unavailable, using keyboard
+2026-02-24 22:40:33,257 [INFO] main: Button-gated text loop started
+2026-02-24 22:43:53,568 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 22:43:53,570 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 22:43:53,570 [WARNING] main: AudioManager unavailable: No module named 'pyaudio'
+2026-02-24 22:43:53,640 [WARNING] main: Whisper STT unavailable: Whisper model not found: /home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin
+2026-02-24 22:43:53,781 [INFO] faiss.loader: Loading faiss.
+2026-02-24 22:43:53,812 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 22:43:57,905 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 22:43:57,905 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 22:43:58,299 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 22:43:58,300 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 22:43:58,300 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 22:43:58,300 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 22:43:58,300 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 22:43:58,514 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 22:43:58,516 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 22:43:59,808 [INFO] main: Session started
+2026-02-24 22:43:59,808 [INFO] main: Button-gated text mode: mic unavailable, using keyboard
+2026-02-24 22:43:59,809 [INFO] main: Hold-to-talk text loop started
+2026-02-24 22:55:51,924 [INFO] main: Received shutdown signal
+2026-02-24 22:55:51,950 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 22:55:51,953 [INFO] main: Shutdown complete
+2026-02-24 22:56:18,840 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 22:56:18,841 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 22:56:18,842 [WARNING] main: AudioManager unavailable: No module named 'pyaudio'
+2026-02-24 22:56:18,918 [WARNING] main: Whisper STT unavailable: Whisper model not found: /home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin
+2026-02-24 22:56:19,072 [INFO] faiss.loader: Loading faiss.
+2026-02-24 22:56:19,110 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 22:56:23,542 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 22:56:23,542 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 22:56:23,937 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 22:56:23,938 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 22:56:23,938 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 22:56:23,938 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 22:56:23,938 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 22:56:24,150 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 22:56:24,152 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 22:56:25,461 [INFO] main: Session started
+2026-02-24 22:56:25,461 [INFO] main: Button-gated text mode: mic unavailable, using keyboard
+2026-02-24 22:56:25,461 [INFO] main: Hold-to-talk text loop started
+2026-02-24 22:56:41,033 [INFO] main: Long hold: initiating shutdown
+2026-02-24 22:56:42,033 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 22:56:42,039 [INFO] main: Shutdown complete
+2026-02-24 22:56:42,089 [INFO] main: Received shutdown signal
+2026-02-24 23:01:00,817 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:01:00,821 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:01:00,822 [WARNING] main: AudioManager unavailable: No module named 'pyaudio'
+2026-02-24 23:01:01,018 [WARNING] main: Whisper STT unavailable: Whisper model not found: /home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin
+2026-02-24 23:01:01,829 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:01:01,993 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:01:10,207 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:01:10,207 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:01:37,739 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:01:37,740 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:01:37,754 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:01:37,755 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:01:37,755 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:01:38,349 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:01:38,354 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:01:40,494 [INFO] main: Session started
+2026-02-24 23:01:40,494 [INFO] main: Button-gated text mode: mic unavailable, using keyboard
+2026-02-24 23:01:40,495 [INFO] main: Hold-to-talk text loop started
+2026-02-24 23:01:54,071 [INFO] main: Long hold: initiating shutdown
+2026-02-24 23:01:55,072 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 23:01:55,076 [INFO] main: Shutdown complete
+2026-02-24 23:13:39,465 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:13:39,467 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:13:39,468 [WARNING] main: AudioManager unavailable: No module named 'pyaudio'
+2026-02-24 23:13:39,535 [WARNING] main: Whisper STT unavailable: Whisper model not found: /home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin
+2026-02-24 23:13:39,943 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:13:40,111 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:13:48,527 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:13:48,527 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:14:16,065 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:14:16,065 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:14:16,078 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:14:16,078 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:14:16,078 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:14:16,677 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:14:16,682 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:14:18,971 [INFO] main: Session started
+2026-02-24 23:14:18,971 [INFO] main: Button-gated text mode: mic unavailable, using keyboard
+2026-02-24 23:14:18,972 [INFO] main: Hold-to-talk text loop started
+2026-02-24 23:14:33,426 [INFO] main: Response (assessing): 'I'm here to help. Can you describe what's wrong? Is someone injured?'
+2026-02-24 23:14:49,160 [INFO] main: Response (assessing): 'I need more information. What exactly happened? Who is affected?'
+2026-02-24 23:15:16,181 [INFO] main: Response (assessing): 'Tell me what's happening so I can help you properly.'
+2026-02-24 23:15:34,469 [INFO] main: Response (assessing): 'Tell me what's happening so I can help you properly.'
+2026-02-24 23:15:41,302 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 23:15:41,370 [INFO] main: Shutdown complete
+2026-02-24 23:17:52,435 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:17:52,437 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:17:52,437 [WARNING] main: AudioManager unavailable: No module named 'pyaudio'
+2026-02-24 23:17:52,503 [WARNING] main: Whisper STT unavailable: Whisper model not found: /home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin
+2026-02-24 23:17:52,650 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:17:52,681 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:17:56,737 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:17:56,737 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:17:57,127 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:17:57,128 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:17:57,128 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:17:57,128 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:17:57,129 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:17:57,333 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:17:57,335 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:17:58,931 [INFO] main: Session started
+2026-02-24 23:17:58,932 [INFO] main: Button-gated text mode: mic unavailable, using keyboard
+2026-02-24 23:17:58,932 [INFO] main: Hold-to-talk text loop started
+2026-02-24 23:19:01,220 [INFO] main: Received shutdown signal
+2026-02-24 23:19:01,698 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 23:19:01,716 [INFO] main: Shutdown complete
+2026-02-24 23:19:06,878 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:19:06,880 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:19:06,880 [WARNING] main: AudioManager unavailable: No module named 'pyaudio'
+2026-02-24 23:19:06,942 [WARNING] main: Whisper STT unavailable: Whisper model not found: /home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin
+2026-02-24 23:19:07,086 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:19:07,118 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:19:11,152 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:19:11,152 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:19:11,547 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:19:11,547 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:19:11,547 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:19:11,548 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:19:11,548 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:19:11,752 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:19:11,754 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:19:13,215 [INFO] main: Session started
+2026-02-24 23:19:13,215 [INFO] main: Button-gated text mode: mic unavailable, using keyboard
+2026-02-24 23:19:13,216 [INFO] main: Hold-to-talk text loop started
+2026-02-24 23:19:23,469 [INFO] main: Response (assessing): 'I'm here to help. Can you describe what's wrong? Is someone injured?'
+2026-02-24 23:19:37,931 [INFO] main: Response (assessing): 'I need more information. What exactly happened? Who is affected?'
+2026-02-24 23:19:47,665 [INFO] main: Response (assessing): 'Tell me what's happening so I can help you properly.'
+2026-02-24 23:19:59,381 [INFO] main: Response (assessing): 'Tell me what's happening so I can help you properly.'
+2026-02-24 23:21:16,498 [INFO] main: Response (guiding): 'Check if you can see blood. If yes, apply pressure with a clean cloth. Stay calm'
+2026-02-24 23:25:14,588 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 23:25:14,683 [INFO] main: Shutdown complete
+2026-02-24 23:39:11,360 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:39:11,361 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:39:11,651 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:39:11,684 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:39:15,671 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:39:15,671 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:39:16,064 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:39:16,065 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:39:16,065 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:39:16,065 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:39:16,065 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:39:16,265 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:39:16,268 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:39:23,946 [INFO] main: Session started
+2026-02-24 23:39:23,946 [INFO] main: Hardware mode: waiting for button events (mic active)
+2026-02-24 23:40:42,441 [INFO] main: Received shutdown signal
+2026-02-24 23:40:42,516 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 23:40:42,601 [INFO] main: Shutdown complete
+2026-02-24 23:41:22,304 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:41:22,306 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:41:22,598 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:41:22,631 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:41:26,618 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:41:26,618 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:41:27,016 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:41:27,016 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:41:27,016 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:41:27,016 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:41:27,017 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:41:27,216 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:41:27,219 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:41:35,310 [INFO] main: Session started
+2026-02-24 23:41:35,310 [INFO] main: Hardware mode: waiting for button events (mic active)
+2026-02-24 23:42:16,124 [INFO] main: Recording started → /tmp/rec_wsh3pfr8.wav
+2026-02-24 23:42:21,922 [INFO] main: Recording stopped (5.77s)
+2026-02-24 23:42:23,044 [INFO] main: STT result: 'you'
+2026-02-24 23:42:23,044 [INFO] main: Response (assessing): 'I'm here to help. Can you describe what's wrong? Is someone injured?'
+2026-02-24 23:42:30,531 [INFO] main: Recording started → /tmp/rec_gdgcgfbu.wav
+2026-02-24 23:42:32,533 [INFO] main: Recording stopped (0.01s)
+2026-02-24 23:42:32,534 [INFO] main: Press too short, ignoring
+2026-02-24 23:42:32,541 [INFO] main: Recording started → /tmp/rec_u2xa57in.wav
+2026-02-24 23:42:32,620 [INFO] main: Recording stopped (0.01s)
+2026-02-24 23:42:32,621 [INFO] main: Press too short, ignoring
+2026-02-24 23:42:53,188 [INFO] main: Received shutdown signal
+2026-02-24 23:42:53,277 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 23:42:53,382 [INFO] main: Shutdown complete
+2026-02-24 23:42:56,273 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:42:56,275 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:42:56,568 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:42:56,600 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:43:00,689 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:43:00,690 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:43:01,092 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:43:01,092 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:43:01,093 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:43:01,093 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:43:01,093 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:43:01,295 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:43:01,298 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:43:08,771 [INFO] main: Session started
+2026-02-24 23:43:08,771 [INFO] main: Hardware mode: waiting for button events (mic active)
+2026-02-24 23:44:08,782 [INFO] main: Received shutdown signal
+2026-02-24 23:44:08,822 [INFO] main: Shutting down Crisis Assistant
+2026-02-24 23:44:08,890 [INFO] main: Shutdown complete
+2026-02-24 23:44:11,681 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:44:11,683 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:44:12,111 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:44:12,144 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:44:16,152 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:44:16,152 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:44:16,538 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:44:16,538 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:44:16,539 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:44:16,539 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:44:16,539 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:44:16,739 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:44:16,741 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:44:24,344 [INFO] main: Session started
+2026-02-24 23:44:24,344 [INFO] main: Hardware mode: waiting for button events (mic active)
+2026-02-24 23:46:25,737 [INFO] main: Recording started → /tmp/rec_o8fzbjv5.wav
+2026-02-24 23:46:29,010 [INFO] main: Recording stopped (3.23s)
+2026-02-24 23:46:30,107 [INFO] main: STT result: 'you'
+2026-02-24 23:46:30,108 [INFO] main: Response (assessing): 'I'm here to help. Can you describe what's wrong? Is someone injured?'
+2026-02-24 23:46:37,620 [INFO] main: Recording started → /tmp/rec__28bgxgo.wav
+2026-02-24 23:49:35,680 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-24 23:49:35,681 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-24 23:49:35,987 [INFO] faiss.loader: Loading faiss.
+2026-02-24 23:49:36,020 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-24 23:49:40,063 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-24 23:49:40,063 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-24 23:49:40,485 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-24 23:49:40,485 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-24 23:49:40,486 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-24 23:49:40,486 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-24 23:49:40,486 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-24 23:49:40,693 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-24 23:49:40,696 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-24 23:49:49,204 [INFO] main: Session started
+2026-02-24 23:49:49,204 [INFO] main: Hardware mode: waiting for button events (mic active)
+2026-02-25 00:47:57,373 [INFO] main: Received shutdown signal
+2026-02-25 12:46:51,273 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-25 12:46:51,293 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-25 12:46:52,122 [INFO] faiss.loader: Loading faiss.
+2026-02-25 12:46:52,256 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-25 12:46:59,966 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-25 12:46:59,966 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-25 12:47:26,965 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-25 12:47:26,965 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-25 12:47:26,976 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-25 12:47:26,976 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-25 12:47:26,976 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-25 12:47:27,567 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-25 12:47:27,572 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-25 12:47:36,077 [INFO] main: Session started
+2026-02-25 12:47:36,078 [INFO] main: Hardware mode: waiting for button events (mic active)
+2026-02-25 12:48:48,365 [INFO] main: Recording started → /tmp/rec_07hozntl.wav
+2026-02-25 12:48:50,971 [INFO] main: Recording stopped (2.68s, source=button_release)
+2026-02-25 12:48:52,964 [INFO] main: STT result: 'You can wear it. Quite a lot my dear.'
+2026-02-25 12:48:52,965 [INFO] main: Response (assessing): 'I'm here to help. Can you describe what's wrong? Is someone injured?'
+2026-02-25 12:48:59,300 [INFO] main: Recording started → /tmp/rec_bv_5gabe.wav
+2026-02-25 12:48:59,366 [INFO] main: Recording stopped (0.13s, source=button_release)
+2026-02-25 12:48:59,367 [INFO] main: Press too short (0.13s < 0.20s), ignoring
+2026-02-25 12:48:59,409 [INFO] main: Recording started → /tmp/rec_k11yol94.wav
+2026-02-25 12:49:14,170 [INFO] main: Recording stopped (14.80s, source=button_release)
+2026-02-25 12:49:15,367 [INFO] main: STT result: 'They will give you new.'
+2026-02-25 12:49:15,367 [INFO] main: Response (assessing): 'I need more information. What exactly happened? Who is affected?'
+2026-02-25 12:49:23,079 [INFO] main: Recording started → /tmp/rec_1hbgzk20.wav
+2026-02-25 12:49:26,369 [INFO] main: Recording stopped (3.35s, source=button_release)
+2026-02-25 12:49:27,451 [INFO] main: STT result: 'My hand is bleeding.'
+2026-02-25 12:50:13,475 [INFO] main: Response (guiding): 'I'm here to assist you. Apply gentle pressure with a clean cloth on your wound. '
+2026-02-25 12:50:27,913 [INFO] main: Recording started → /tmp/rec_exuy597u.wav
+2026-02-25 12:50:27,982 [INFO] main: Recording stopped (0.13s, source=button_release)
+2026-02-25 12:50:27,982 [INFO] main: Press too short (0.13s < 0.20s), ignoring
+2026-02-25 12:50:28,021 [INFO] main: Recording started → /tmp/rec_a_zm2u09.wav
+2026-02-25 12:50:28,067 [INFO] main: Recording stopped (0.08s, source=button_release)
+2026-02-25 12:50:28,068 [INFO] main: Press too short (0.08s < 0.20s), ignoring
+2026-02-25 12:55:29,996 [INFO] main: ━━━ Crisis Assistant v2.0 starting ━━━
+2026-02-25 12:55:29,997 [WARNING] main: LCD unavailable: No module named 'smbus2'
+2026-02-25 12:55:30,263 [INFO] faiss.loader: Loading faiss.
+2026-02-25 12:55:30,293 [INFO] faiss.loader: Successfully loaded faiss.
+2026-02-25 12:55:34,173 [INFO] src.llm.engine: Loading LLM: /home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf
+2026-02-25 12:55:34,173 [INFO] src.llm.engine: This may take 1-2 minutes on first load…
+2026-02-25 12:55:34,552 [INFO] src.llm.engine: ✅ LLM engine ready (Phi-3 Mini, ctx=4096)
+2026-02-25 12:55:34,553 [INFO] src.rag.engine: Loading FAISS index from /home/joshua/crisis-assistant/data/index/faiss.index
+2026-02-25 12:55:34,553 [INFO] src.rag.engine: Loaded 21 document chunks (index size: 21 vectors)
+2026-02-25 12:55:34,553 [INFO] src.rag.engine: Loading embedding model: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5 (local_files_only=True)
+2026-02-25 12:55:34,554 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: /home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5
+2026-02-25 12:55:34,748 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cpu
+2026-02-25 12:55:34,750 [INFO] src.rag.engine: ✅ RAG engine ready (FAISS + sentence-transformers)
+2026-02-25 12:55:42,061 [INFO] main: Session started
+2026-02-25 12:55:42,061 [INFO] main: Hardware mode: waiting for button events (mic active)

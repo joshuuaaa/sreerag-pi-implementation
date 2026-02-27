@@ -12,6 +12,7 @@ import time
 import signal
 import logging
 import tempfile
+import threading
 import traceback
 from pathlib import Path
 
@@ -34,6 +35,22 @@ def _setup_logging(config: dict):
     )
 
 logger = logging.getLogger("main")
+
+
+def _as_bool(value, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"1", "true", "yes", "on", "y"}:
+            return True
+        if normalized in {"0", "false", "no", "off", "n"}:
+            return False
+    return default
 
 
 # ── graceful-shutdown sentinel ────────────────────────────────────────────────
@@ -60,6 +77,9 @@ class CrisisAssistant:
 
     def __init__(self, config: dict):
         self.config   = config
+        env_text_only = os.environ.get("CRISIS_TEXT_ONLY")
+        cfg_text_only = config.get("app", {}).get("text_only", False)
+        self.text_only = _as_bool(env_text_only, _as_bool(cfg_text_only, False))
         self.lcd      = None
         self.audio    = None
         self.button   = None
@@ -71,11 +91,21 @@ class CrisisAssistant:
         # Lazy state flags
         self._recording  = False
         self._processing = False
+        self._record_start_time = 0.0
+        self._record_timeout_timer = None
+
+        app_cfg = self.config.get("app", {})
+        self._min_press_seconds = float(app_cfg.get("min_press_seconds", 0.2))
+        self._max_record_seconds = float(app_cfg.get("max_record_seconds", 20.0))
 
     # ── initialisation ────────────────────────────────────────────────────────
 
     def init_hardware(self):
         """Boot display, audio, and button – fail gracefully on non-Pi."""
+        if self.text_only:
+            logger.info("Text-only mode enabled: skipping hardware init")
+            return
+
         # LCD
         try:
             from src.hardware.lcd import ConversationLCD
@@ -103,25 +133,28 @@ class CrisisAssistant:
             self.button.on_press_start  = self._on_press_start
             self.button.on_press_end    = self._on_press_end
             self.button.on_triple_press = self._on_triple_press
-            self.button.on_long_hold    = self._on_long_hold
+            self.button.on_long_hold    = None
         except Exception as e:
             logger.warning("GPIO button unavailable: %s – running in demo mode", e)
 
     def init_ai(self):
         """Load STT, TTS, and the full AI orchestrator."""
-        # STT
-        try:
-            from src.audio.stt import WhisperSTT
-            self.stt = WhisperSTT(self.config.get("whisper", {}))
-        except Exception as e:
-            logger.warning("Whisper STT unavailable: %s", e)
+        if self.text_only:
+            logger.info("Text-only mode enabled: skipping STT/TTS init")
+        else:
+            # STT
+            try:
+                from src.audio.stt import WhisperSTT
+                self.stt = WhisperSTT(self.config.get("whisper", {}))
+            except Exception as e:
+                logger.warning("Whisper STT unavailable: %s", e)
 
-        # TTS
-        try:
-            from src.audio.tts import PiperTTS
-            self.tts = PiperTTS(self.config.get("piper", {}))
-        except Exception as e:
-            logger.warning("Piper TTS unavailable: %s", e)
+            # TTS
+            try:
+                from src.audio.tts import PiperTTS
+                self.tts = PiperTTS(self.config.get("piper", {}))
+            except Exception as e:
+                logger.warning("Piper TTS unavailable: %s", e)
 
         # Orchestrator (loads LLM, RAG, decision engine)
         from src.orchestrator import IntelligentOrchestrator
@@ -142,7 +175,12 @@ class CrisisAssistant:
             logger.debug("Still processing previous request, ignoring press")
             return
 
+        if self._recording:
+            logger.debug("Already recording, ignoring duplicate press")
+            return
+
         self._recording = True
+        self._record_start_time = time.time()
         self._display("listening")
         self._stop_playback()
 
@@ -151,9 +189,42 @@ class CrisisAssistant:
         if self.audio:
             self.audio.start_recording(tmp)
         logger.info("Recording started → %s", tmp)
+        self._schedule_record_timeout()
 
     def _on_press_end(self, hold_duration: float):
         """Button released – stop recording and run the pipeline."""
+        if not self._recording:
+            return
+
+        self._finalize_recording(hold_duration=hold_duration, source="button_release")
+
+    def _schedule_record_timeout(self):
+        self._cancel_record_timeout()
+        if self._max_record_seconds <= 0:
+            return
+
+        self._record_timeout_timer = threading.Timer(
+            self._max_record_seconds, self._on_record_timeout
+        )
+        self._record_timeout_timer.daemon = True
+        self._record_timeout_timer.start()
+
+    def _cancel_record_timeout(self):
+        if self._record_timeout_timer and self._record_timeout_timer.is_alive():
+            self._record_timeout_timer.cancel()
+        self._record_timeout_timer = None
+
+    def _on_record_timeout(self):
+        if not self._recording or self._processing:
+            return
+
+        elapsed = time.time() - self._record_start_time if self._record_start_time else self._max_record_seconds
+        logger.warning("Recording timed out after %.2fs; auto-submitting", elapsed)
+        self._finalize_recording(hold_duration=elapsed, source="timeout")
+
+    def _finalize_recording(self, hold_duration: float, source: str):
+        self._cancel_record_timeout()
+
         if not self._recording:
             return
 
@@ -161,10 +232,18 @@ class CrisisAssistant:
         if self.audio:
             self.audio.stop_recording()
 
-        logger.info("Recording stopped (%.2fs)", hold_duration)
+        elapsed = time.time() - self._record_start_time if self._record_start_time else hold_duration
+        measured_hold = max(hold_duration, elapsed)
+        self._record_start_time = 0.0
 
-        if hold_duration < 0.4:
-            logger.info("Press too short, ignoring")
+        logger.info("Recording stopped (%.2fs, source=%s)", measured_hold, source)
+
+        if measured_hold < self._min_press_seconds:
+            logger.info(
+                "Press too short (%.2fs < %.2fs), ignoring",
+                measured_hold,
+                self._min_press_seconds,
+            )
             self._display("idle")
             return
 
@@ -173,9 +252,11 @@ class CrisisAssistant:
     def _on_triple_press(self):
         """Triple press – reset conversation."""
         logger.info("Triple press: resetting conversation")
+        self._cancel_record_timeout()
         if self._recording and self.audio:
             self.audio.stop_recording()
             self._recording = False
+            self._record_start_time = 0.0
 
         self.orch.reset_session()
         greeting = self.orch.start_session()
@@ -183,13 +264,9 @@ class CrisisAssistant:
         self._display("idle")
 
     def _on_long_hold(self):
-        """5-second long hold – safe shutdown."""
-        logger.info("Long hold: initiating shutdown")
-        if self.lcd:
-            self.lcd.show("Shutting down", "Goodbye...")
-        time.sleep(1)
-        self.shutdown()
-        os.system("sudo shutdown -h now")
+        """Long hold handler (disabled)."""
+        logger.info("Long hold detected (shutdown disabled)")
+        return False
 
     # ── core pipeline ─────────────────────────────────────────────────────────
 
@@ -277,6 +354,132 @@ class CrisisAssistant:
         if self.audio and hasattr(self.audio, "stop_playback"):
             self.audio.stop_playback()
 
+    # ── hold-to-talk text mode (button present, no mic) ─────────────────────
+
+    def run_button_text_loop(self):
+        """
+        True hold-to-talk text loop.
+
+        - HOLD button  → input prompt appears, characters are accepted.
+        - RELEASE      → input stops immediately, message auto-submits.
+        - Nothing typed on release → discarded silently.
+        - Triple press → reset session.
+        - Long hold → no power action.
+        """
+        import threading
+        import termios
+        import tty
+        import select
+
+        _pressed = threading.Event()
+        _released = threading.Event()
+
+        def _on_press():
+            if not self._processing:
+                self._recording = True
+                _pressed.set()
+                _released.clear()
+
+        def _on_release(hold_duration: float):
+            self._recording = False
+            _released.set()
+
+        def _on_triple():
+            self.orch.reset_session()
+            greeting = self.orch.start_session()
+            print(f"\n🔄 Session reset\n🤖 ASSISTANT: {greeting}\n")
+
+        self.button.on_press_start  = _on_press
+        self.button.on_press_end    = _on_release
+        self.button.on_triple_press = _on_triple
+
+        print("\n" + "="*60)
+        print("  CRISIS ASSISTANT – HOLD-TO-TALK TEXT MODE")
+        print("  Hold button + type → release to send")
+        print("  Triple press = reset  |  Long hold = no action  |  Ctrl-C = quit")
+        print("="*60 + "\n")
+
+        self._display("idle")
+        logger.info("Hold-to-talk text loop started")
+
+        while _running:
+            _pressed.clear()
+            _released.clear()
+            print("⏳  Hold button and type your message...")
+
+            # ── wait for button press ─────────────────────────────────────
+            while _running and not _pressed.wait(timeout=0.5):
+                pass
+            if not _running:
+                break
+
+            self._display("listening")
+            print("\n🎙️  HOLD + TYPE  (release to send)\n  > ", end="", flush=True)
+
+            # ── collect chars while button held, raw mode ─────────────────
+            fd = sys.stdin.fileno()
+            old_settings = termios.tcgetattr(fd)
+            chars = []
+            try:
+                tty.setraw(fd)
+                while not _released.is_set() and _running:
+                    ready, _, _ = select.select([sys.stdin], [], [], 0.05)
+                    if ready:
+                        ch = sys.stdin.read(1)
+                        if ch in ("\x03", "\x04"):   # Ctrl-C / Ctrl-D
+                            raise KeyboardInterrupt
+                        elif ch in ("\x7f", "\x08"):  # backspace
+                            if chars:
+                                chars.pop()
+                                sys.stdout.write("\b \b")
+                                sys.stdout.flush()
+                        elif ch.isprintable():
+                            chars.append(ch)
+                            sys.stdout.write(ch)
+                            sys.stdout.flush()
+            except KeyboardInterrupt:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+                print()
+                break
+            finally:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+            user_input = "".join(chars).strip()
+            print(f"\n  [sent: {user_input!r}]\n" if user_input else "\n  (nothing typed)\n")
+
+            if not user_input:
+                self._display("idle")
+                continue
+
+            if user_input.lower() == "quit":
+                break
+
+            # ── process ───────────────────────────────────────────────────
+            self._display("processing")
+            self._processing = True
+            try:
+                result   = self.orch.process_message(user_input)
+                response = result.get("response", "")
+                state    = result.get("state", "")
+                analysis = result.get("analysis", {})
+
+                logger.info("Response (%s): '%s'", state, response[:80])
+                self._speak(response)
+
+                if analysis.get("conditions"):
+                    conds = [
+                        f"{c['type']}({c['severity']})"
+                        for c in analysis["conditions"]
+                    ]
+                    print(f"   [Analysis] phase={analysis['phase']} | conditions={conds}")
+                print()
+            except Exception as e:
+                logger.error("Pipeline error: %s", e)
+                print(f"❌ Error: {e}\n")
+            finally:
+                self._processing = False
+                self._display("idle")
+
     # ── demo mode (no GPIO) ───────────────────────────────────────────────────
 
     def run_demo_loop(self):
@@ -324,21 +527,35 @@ class CrisisAssistant:
         - If GPIO button is available: wait for button events.
         - Otherwise: fall back to interactive text demo.
         """
-        if self.button:
-            logger.info("Hardware mode: waiting for button events")
+        if self.text_only:
+            logger.info("Text-only mode: interactive console loop")
+            self.run_demo_loop()
+            self.shutdown()
+            return
+
+        if self.button and self.audio:
+            # Full hardware mode: button triggers mic recording
+            logger.info("Hardware mode: waiting for button events (mic active)")
             self._display("idle")
             try:
                 while _running:
                     time.sleep(0.1)
             finally:
                 self.shutdown()
+        elif self.button and not self.audio:
+            # Button present but no mic: gated text input
+            logger.info("Button-gated text mode: mic unavailable, using keyboard")
+            self.run_button_text_loop()
+            self.shutdown()
         else:
+            # No button: free-form text demo
             self.run_demo_loop()
             self.shutdown()
 
     def shutdown(self):
         """Clean shutdown of all components."""
         logger.info("Shutting down Crisis Assistant")
+        self._cancel_record_timeout()
         if self.button:
             try:
                 self.button.cleanup()
@@ -369,6 +586,8 @@ def main():
 
     _setup_logging(config)
     logger.info("━━━ Crisis Assistant v%s starting ━━━", config.get("app", {}).get("version", "?"))
+    if _as_bool(os.environ.get("CRISIS_TEXT_ONLY"), _as_bool(config.get("app", {}).get("text_only", False))):
+        logger.info("Text-only mode is active")
 
     # Ensure required directories exist
     ensure_dir("logs")

@@ -7,7 +7,7 @@ app:
   prompt_style: "warm"
 
 hardware:
-  button_pin: 17
+  button_pin: 16
   lcd_type: "i2c"
   lcd_address: 0x27
   lcd_cols: 16
@@ -21,16 +21,16 @@ audio:
   speaker_device: null   # null = default ALSA output
 
 whisper:
-  model_path: "/home/pi/crisis-assistant/models/whisper/ggml-tiny.en.bin"
-  binary_path: "/home/pi/crisis-assistant/models/whisper/whisper-cpp/main"
+  model_path: "/home/joshua/crisis-assistant/models/whisper/ggml-tiny.en.bin"
+  binary_path: "/home/joshua/crisis-assistant/models/whisper/whisper-cpp/build/bin/whisper-cli"
   language: "en"
 
 piper:
-  model_path: "/home/pi/crisis-assistant/models/piper/en_US-lessac-medium.onnx"
-  binary_path: "/home/pi/crisis-assistant/models/piper/piper/build/piper"
+  model_path: "/home/joshua/crisis-assistant/models/piper/en_US-amy-medium.onnx"
+  binary_path: "/home/joshua/crisis-assistant/models/piper/piper/build/piper"
 
 llm:
-  model_path: "/home/pi/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf"
+  model_path: "/home/joshua/crisis-assistant/models/llm/Phi-3-mini-4k-instruct-q4.gguf"
   n_ctx: 4096
   n_threads: 4           # Pi 5 has 4 cores; use all for inference
   n_gpu_layers: 0        # CPU-only; set >0 if you add a GPU accelerator
@@ -38,13 +38,21 @@ llm:
   max_tokens: 150
 
 rag:
-  index_path: "/home/pi/crisis-assistant/data/index"
+  index_path: "/home/joshua/crisis-assistant/data/index"
   embedding_model: "BAAI/bge-small-en-v1.5"
+  model_path: "/home/joshua/crisis-assistant/models/embeddings/bge-small-en-v1.5"
+  local_files_only: true
   top_k: 3
 
 decision:
-  tree_dir: "/home/pi/crisis-assistant/decision_trees"
+  tree_dir: "/home/joshua/crisis-assistant/decision_trees"
 
 logging:
   level: "INFO"
-  file: "/home/pi/crisis-assistant/logs/crisis_assistant.log"
+  file: "/home/joshua/crisis-assistant/logs/crisis_assistant.log"
+
+gpio:
+  enabled: true
+  button_pin: 16
+  button_active_low: true
+  button_pull_up: true
