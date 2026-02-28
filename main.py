@@ -17,21 +17,23 @@ import traceback
 from pathlib import Path
 
 from src.utils import load_config, ensure_dir
+from src.ui import TerminalUI
 
 # ── logging ──────────────────────────────────────────────────────────────────
-def _setup_logging(config: dict):
+def _setup_logging(config: dict, enable_console_logs: bool = False):
     log_cfg = config.get("logging", {})
     level   = getattr(logging, log_cfg.get("level", "INFO"), logging.INFO)
     logfile = log_cfg.get("file", "logs/crisis_assistant.log")
     ensure_dir(os.path.dirname(logfile))
 
+    handlers = [logging.FileHandler(logfile)]
+    if enable_console_logs:
+        handlers.append(logging.StreamHandler(sys.stdout))
+
     logging.basicConfig(
         level=level,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        handlers=[
-            logging.FileHandler(logfile),
-            logging.StreamHandler(sys.stdout),
-        ],
+        handlers=handlers,
     )
 
 logger = logging.getLogger("main")
@@ -87,6 +89,15 @@ class CrisisAssistant:
         self.tts      = None
         self.orch     = None
         self._tmp_wav = None   # path of last recording
+        self.clean_ui = _as_bool(self.config.get("app", {}).get("clean_terminal_ui", True), True)
+        _display_cols = self.config.get("app", {}).get("display_cols", None)
+        _display_rows = self.config.get("app", {}).get("display_rows", None)
+        self.ui = TerminalUI(
+            title=self.config.get("app", {}).get("name", "Crisis Assistant"),
+            enabled=self.clean_ui and sys.stdout.isatty(),
+            max_cols=int(_display_cols) if _display_cols is not None else None,
+            max_rows=int(_display_rows) if _display_rows is not None else None,
+        )
 
         # Lazy state flags
         self._recording  = False
@@ -163,6 +174,8 @@ class CrisisAssistant:
     def start(self):
         """Start a fresh session and greet the user."""
         greeting = self.orch.start_session()
+        self.ui.add_log("Session started")
+        self.ui.set_hint("Hold button to speak. Triple press to reset.")
         self._speak(greeting)
         self._display("idle")
         logger.info("Session started")
@@ -182,6 +195,8 @@ class CrisisAssistant:
         self._recording = True
         self._record_start_time = time.time()
         self._display("listening")
+        self.ui.add_log("Recording started…")
+        self.ui.set_hint("Listening…  Release button to process.")
         self._stop_playback()
 
         tmp = tempfile.mktemp(suffix=".wav", prefix="rec_")
@@ -260,6 +275,8 @@ class CrisisAssistant:
 
         self.orch.reset_session()
         greeting = self.orch.start_session()
+        self.ui.set_status("Session reset")
+        self.ui.add_log("Conversation reset by triple press")
         self._speak(greeting)
         self._display("idle")
 
@@ -276,6 +293,7 @@ class CrisisAssistant:
         try:
             # 1. STT ──────────────────────────────────────────────────────────
             self._display("processing")
+            self.ui.add_log("STT: transcribing audio…")
             user_text = ""
             if self.stt and wav_file and os.path.exists(wav_file):
                 user_text = self.stt.transcribe(wav_file)
@@ -283,18 +301,29 @@ class CrisisAssistant:
                 logger.warning("STT skipped – no audio file or STT unavailable")
 
             if not user_text.strip():
+                self.ui.add_log("STT: no speech detected")
                 self._speak("I didn't catch that. Please try again.")
                 self._display("idle")
                 return
 
             logger.info("STT result: '%s'", user_text)
+            self.ui.add_log(f"STT: \"{user_text[:60]}{'…' if len(user_text) > 60 else ''}\"")
+            self.ui.set_user_text(user_text)
 
             # 2. Orchestrate ──────────────────────────────────────────────────
+            self.ui.add_log("AI: analyzing situation…")
             result = self.orch.process_message(user_text)
             response_text = result.get("response", "")
             lcd_text      = result.get("lcd_display", "")
             state         = result.get("state", "responding")
             analysis      = result.get("analysis", {})
+            phase         = analysis.get("phase", "")
+            conditions    = [c["type"] for c in analysis.get("conditions", [])]
+
+            if conditions:
+                self.ui.add_log(f"AI: detected {', '.join(conditions)} ({phase})")
+            else:
+                self.ui.add_log(f"AI: response ready ({state})")
 
             logger.info("Response (%s): '%s'", state, response_text[:80])
 
@@ -307,6 +336,7 @@ class CrisisAssistant:
                 self._display("responding")
 
             # 4. TTS + playback ───────────────────────────────────────────────
+            self.ui.add_log("TTS: synthesizing speech…")
             self._speak(response_text)
 
             # 5. Post-response idle state ─────────────────────────────────────
@@ -317,6 +347,8 @@ class CrisisAssistant:
 
         except Exception as e:
             logger.error("Pipeline error: %s\n%s", e, traceback.format_exc())
+            self.ui.set_status("Error")
+            self.ui.add_log(f"ERROR: {str(e)[:80]}")
             self._speak("Something went wrong. Please try again.")
             self._display("error")
         finally:
@@ -334,7 +366,9 @@ class CrisisAssistant:
         """Synthesize and play text, with console fallback."""
         if not text:
             return
-        print(f"\n🤖 ASSISTANT: {text}\n")
+        self.ui.set_assistant_text(text)
+        if not self.ui.enabled:
+            print(f"Assistant: {text}")
         if self.tts:
             wav = self.tts.synthesize(text)
             if wav and self.audio:
@@ -346,6 +380,15 @@ class CrisisAssistant:
 
     def _display(self, state: str):
         """Send predefined state to LCD (no-op if LCD unavailable)."""
+        ui_state = {
+            "idle": "Idle",
+            "listening": "Listening",
+            "processing": "Processing",
+            "responding": "Responding",
+            "critical": "Critical",
+            "error": "Error",
+        }.get(state, state)
+        self.ui.set_status(ui_state)
         if self.lcd:
             self.lcd.show_state(state)
 
@@ -387,25 +430,21 @@ class CrisisAssistant:
         def _on_triple():
             self.orch.reset_session()
             greeting = self.orch.start_session()
-            print(f"\n🔄 Session reset\n🤖 ASSISTANT: {greeting}\n")
+            self.ui.set_status("Session reset")
+            self._speak(greeting)
 
         self.button.on_press_start  = _on_press
         self.button.on_press_end    = _on_release
         self.button.on_triple_press = _on_triple
 
-        print("\n" + "="*60)
-        print("  CRISIS ASSISTANT – HOLD-TO-TALK TEXT MODE")
-        print("  Hold button + type → release to send")
-        print("  Triple press = reset  |  Long hold = no action  |  Ctrl-C = quit")
-        print("="*60 + "\n")
-
         self._display("idle")
+        self.ui.set_hint("Hold button + type. Release to send.")
         logger.info("Hold-to-talk text loop started")
 
         while _running:
             _pressed.clear()
             _released.clear()
-            print("⏳  Hold button and type your message...")
+            self.ui.set_status("Waiting for button")
 
             # ── wait for button press ─────────────────────────────────────
             while _running and not _pressed.wait(timeout=0.5):
@@ -414,7 +453,7 @@ class CrisisAssistant:
                 break
 
             self._display("listening")
-            print("\n🎙️  HOLD + TYPE  (release to send)\n  > ", end="", flush=True)
+            self.ui.set_hint("Type while holding button. Release to send.")
 
             # ── collect chars while button held, raw mode ─────────────────
             fd = sys.stdin.fileno()
@@ -431,21 +470,16 @@ class CrisisAssistant:
                         elif ch in ("\x7f", "\x08"):  # backspace
                             if chars:
                                 chars.pop()
-                                sys.stdout.write("\b \b")
-                                sys.stdout.flush()
                         elif ch.isprintable():
                             chars.append(ch)
-                            sys.stdout.write(ch)
-                            sys.stdout.flush()
             except KeyboardInterrupt:
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-                print()
                 break
             finally:
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
             user_input = "".join(chars).strip()
-            print(f"\n  [sent: {user_input!r}]\n" if user_input else "\n  (nothing typed)\n")
+            self.ui.set_user_text(user_input)
 
             if not user_input:
                 self._display("idle")
@@ -465,17 +499,10 @@ class CrisisAssistant:
 
                 logger.info("Response (%s): '%s'", state, response[:80])
                 self._speak(response)
-
-                if analysis.get("conditions"):
-                    conds = [
-                        f"{c['type']}({c['severity']})"
-                        for c in analysis["conditions"]
-                    ]
-                    print(f"   [Analysis] phase={analysis['phase']} | conditions={conds}")
-                print()
             except Exception as e:
                 logger.error("Pipeline error: %s", e)
-                print(f"❌ Error: {e}\n")
+                self.ui.set_status("Error")
+                self.ui.set_hint(str(e))
             finally:
                 self._processing = False
                 self._display("idle")
@@ -484,10 +511,8 @@ class CrisisAssistant:
 
     def run_demo_loop(self):
         """Interactive text loop for development / testing without hardware."""
-        print("\n" + "="*60)
-        print("  CRISIS ASSISTANT – DEMO MODE (type to interact)")
-        print("  Commands: 'reset' | 'quit' | any message")
-        print("="*60 + "\n")
+        self.ui.set_status("Demo mode")
+        self.ui.set_hint("Type message. Commands: reset | quit")
 
         while _running:
             try:
@@ -504,19 +529,22 @@ class CrisisAssistant:
             if user_input.lower() == "reset":
                 self.orch.reset_session()
                 greeting = self.orch.start_session()
-                print(f"🔄 Session reset\n🤖 ASSISTANT: {greeting}\n")
+                self.ui.set_status("Session reset")
+                self._speak(greeting)
                 continue
+
+            self.ui.set_user_text(user_input)
+            self.ui.set_status("Processing")
+            self.ui.add_log(f"AI: analyzing…")
 
             result = self.orch.process_message(user_input)
             response  = result.get("response", "")
-            state     = result.get("state", "")
-            analysis  = result.get("analysis", {})
+            state     = result.get("state", "responding")
 
-            print(f"🤖 ASSISTANT: {response}")
-            if analysis.get("conditions"):
-                conds = [f"{c['type']}({c['severity']})" for c in analysis["conditions"]]
-                print(f"   [Analysis] phase={analysis['phase']} | conditions={conds}")
-            print()
+            self._display(state)
+            self._speak(response)
+            self.ui.set_status("Demo mode")
+            self.ui.set_hint("Type message. Commands: reset | quit")
 
     # ── lifecycle ─────────────────────────────────────────────────────────────
 
@@ -555,6 +583,7 @@ class CrisisAssistant:
     def shutdown(self):
         """Clean shutdown of all components."""
         logger.info("Shutting down Crisis Assistant")
+        self.ui.set_status("Shutting down")
         self._cancel_record_timeout()
         if self.button:
             try:
@@ -572,6 +601,7 @@ class CrisisAssistant:
                     self.audio.cleanup()
             except Exception:
                 pass
+        self.ui.shutdown()
         logger.info("Shutdown complete")
 
 
@@ -584,7 +614,9 @@ def main():
         print("❌ Failed to load configuration. Exiting.")
         sys.exit(1)
 
-    _setup_logging(config)
+    app_cfg = config.get("app", {})
+    enable_console_logs = _as_bool(os.environ.get("CRISIS_CONSOLE_LOGS"), _as_bool(app_cfg.get("console_logs", False), False))
+    _setup_logging(config, enable_console_logs=enable_console_logs)
     logger.info("━━━ Crisis Assistant v%s starting ━━━", config.get("app", {}).get("version", "?"))
     if _as_bool(os.environ.get("CRISIS_TEXT_ONLY"), _as_bool(config.get("app", {}).get("text_only", False))):
         logger.info("Text-only mode is active")
@@ -595,13 +627,17 @@ def main():
 
     app = CrisisAssistant(config)
 
-    print("\n🏥 Initializing hardware...")
+    app.ui.set_status("Initializing hardware")
+    app.ui.add_log("Initializing hardware components…")
     app.init_hardware()
+    app.ui.add_log("Hardware init complete")
 
-    print("🧠 Loading AI components (this may take 1-2 minutes)...")
+    app.ui.set_status("Loading AI components")
+    app.ui.add_log("Loading AI components (LLM, RAG, STT, TTS)…")
     app.init_ai()
+    app.ui.add_log("AI components loaded")
 
-    print("✅ All systems ready\n")
+    app.ui.set_status("Ready")
     app.start()
     app.run()
 

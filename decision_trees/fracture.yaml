@@ -59,7 +59,7 @@ nodes:
   femur_fracture:
     id: "femur_fracture"
     type: "escalate"
-    message: "A thigh bone fracture is a serious emergency — it can cause dangerous internal bleeding. Call 911 immediately. Lay the person flat, keep them warm, and do NOT let them stand or walk. Watch for signs of shock: pale skin, rapid breathing, confusion."
+    message: "THIGH BONE FRACTURE — DANGEROUS INTERNAL BLEEDING RISK. Lay the person flat immediately. Do NOT let them stand or walk. Immobilise the leg by tying padding and support above and below the break — use clothing, sticks, or rolled material. Watch for shock: pale skin, rapid breathing, confusion, cold sweating. Send someone for any available help now."
     critical: true
 
   leg_immobilise:
@@ -100,20 +100,20 @@ nodes:
   spinal_precaution_hold:
     id: "spinal_precaution_hold"
     type: "instruction"
-    instruction: "Even without symptoms, keep them still and call 911 — spinal fractures require imaging to rule out. Keep them warm. Talk to them calmly. Do NOT give anything to eat or drink."
+    instruction: "Even without symptoms, a spinal fracture cannot be ruled out without imaging. Keep them completely still. Support their head and neck in the position found. Keep them warm. Do NOT give anything to eat or drink. Talk to them calmly. Send someone for any available medical help."
     rag_tags: ["fracture", "spinal"]
     terminal: true
 
   escalate_spinal:
     id: "escalate_spinal"
     type: "escalate"
-    message: "Possible spinal cord injury. CALL 911 NOW. Do NOT move the person under any circumstances. Hold their head still, support it gently in line with their body. Keep them warm and conscious."
+    message: "POSSIBLE SPINAL CORD INJURY. Do NOT move the person under any circumstances. Hold their head still — support it gently in line with their body. Keep them warm. If they stop breathing, airway management must come first but minimise spinal movement. Log all symptoms to report when medical care is reached. Send someone for help immediately."
     critical: true
 
   open_fracture:
     id: "open_fracture"
     type: "instruction"
-    instruction: "Do NOT push the bone back in. Cover the wound and exposed bone with a moist sterile dressing or clean wet cloth — do NOT use dry fluffy material. Control surrounding bleeding with gentle pressure around (not on) the wound. Immobilise in position found and call 911."
+    instruction: "Do NOT push the bone back in. Cover the wound and exposed bone with a moist sterile dressing or clean wet cloth — do NOT use dry fluffy material. Control surrounding bleeding with gentle pressure around (not on) the wound. Immobilise in the position found. Infection risk is high — keep the wound covered and clean. Send someone for any available medical help."
     rag_tags: ["fracture", "open_fracture", "wound_care", "bleeding"]
     next: "escalate_open"
     critical: true
@@ -121,7 +121,7 @@ nodes:
   escalate_open:
     id: "escalate_open"
     type: "escalate"
-    message: "Open fractures carry high risk of bone infection. Emergency medical care is required. Call 911 and keep the wound covered and the limb still. Do not allow weight-bearing."
+    message: "OPEN FRACTURE — HIGH INFECTION RISK. Keep the wound covered with a moist clean dressing at all times. Immobilise the limb completely. Do not allow weight-bearing. Watch for bone infection signs over coming days: fever, spreading redness, pus, or worsening pain. Seek medical care as soon as it is reachable."
     critical: true
 
   assess_open:
@@ -137,25 +137,25 @@ nodes:
   rib_respiratory:
     id: "rib_respiratory"
     type: "escalate"
-    message: "Rib fractures with breathing difficulty can indicate lung injury. Call 911 immediately. Sit the person upright or at 45 degrees — this makes breathing easier. Do not wrap or bandage the chest tightly."
+    message: "RIB FRACTURES WITH BREATHING DIFFICULTY — possible lung injury. Sit the person upright at 45 degrees — this makes breathing easier. Do NOT wrap or bandage the chest tightly. If breathing worsens rapidly or one side of the chest stops moving, this may be a collapsed lung — they need urgent medical care. Send someone for any available help immediately."
     critical: true
 
   immobilise_other:
     id: "immobilise_other"
     type: "instruction"
-    instruction: "Support the injured area in the most comfortable position. Apply ice wrapped in cloth. For collarbone or shoulder: apply a broad arm sling. Seek medical evaluation — imaging is needed. Do NOT return to physical activity."
+    instruction: "Support the injured area in the most comfortable position. Apply ice wrapped in cloth. For collarbone or shoulder: apply a broad arm sling. Keep the person rested and do NOT return to physical activity. Seek medical evaluation for imaging when care is reachable."
     rag_tags: ["fracture", "splint"]
     next: "seek_care"
 
   seek_care:
     id: "seek_care"
     type: "instruction"
-    instruction: "The fracture is stabilised. Go to the emergency room for X-ray and definitive treatment. Keep the limb elevated and apply ice regularly (20 minutes on, 20 minutes off). Do NOT give aspirin to children."
+    instruction: "The fracture is stabilised. Keep the limb elevated and immobile. Apply ice wrapped in cloth for 20 minutes on, 20 minutes off to reduce swelling. Monitor circulation below the fracture — check warmth, color, and feeling every 30 minutes. Seek medical care for imaging and definitive treatment when it becomes available."
     rag_tags: ["fracture"]
     terminal: true
 
   escalate_csm:
     id: "escalate_csm"
     type: "escalate"
-    message: "Loss of circulation, sensation, or movement below a fracture is a vascular emergency. Call 911 immediately. Do NOT reposition the limb — keep it absolutely still and wait for emergency services."
+    message: "LOSS OF CIRCULATION, SENSATION OR MOVEMENT below the fracture — possible vascular injury. Do NOT reposition the limb. Keep it absolutely still. Check for pulse below the fracture every 5 minutes. This requires urgent medical care — send someone for help immediately. Warmth and feeling must be restored within hours or the limb is at risk."
     critical: true

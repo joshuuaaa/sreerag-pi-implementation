@@ -8,6 +8,10 @@ app:
   version: "2.0"
   prompt_style: "warm"
   text_only: true
+  clean_terminal_ui: true
+  console_logs: false
+  display_cols: null    # null = auto-detect from terminal
+  display_rows: null    # null = auto-detect from terminal
 
 hardware:
   button_pin: 17

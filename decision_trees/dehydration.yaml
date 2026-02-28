@@ -1,0 +1,71 @@
+# decision_trees/dehydration.yaml
+
+tree_id: "dehydration_protocol"
+version: "1.0"
+description: "Dehydration / diarrhea / limited water protocol (austere environment)"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Is the person confused, unconscious, or unable to swallow safely?"
+    critical: true
+    options:
+      - response_match: ["yes", "confused", "unconscious", "can't swallow", "choking"]
+        next: "critical_dehydration"
+      - response_match: ["no", "awake", "can swallow", "responsive"]
+        next: "start_rehydration"
+
+  start_rehydration:
+    id: "start_rehydration"
+    type: "instruction"
+    instruction: "Start oral rehydration now. If you have clean water: sip small amounts every minute. Best is ORS: 1 liter clean water + 6 level teaspoons sugar + 1/2 teaspoon salt. Stir until dissolved."
+    rag_tags: ["dehydration", "first_aid"]
+    next: "vomiting_check"
+    critical: true
+
+  vomiting_check:
+    id: "vomiting_check"
+    type: "question"
+    question: "Are they vomiting repeatedly (can't keep fluids down)?"
+    options:
+      - response_match: ["yes", "vomiting", "can't keep down", "throwing up"]
+        next: "vomiting_plan"
+      - response_match: ["no", "not vomiting", "okay"]
+        next: "urine_check"
+
+  vomiting_plan:
+    id: "vomiting_plan"
+    type: "instruction"
+    instruction: "Do NOT stop fluids. Switch to 1 teaspoon every 1–2 minutes. If vomiting continues, place them on their side and keep trying tiny sips. If they become confused or stop peeing for many hours, this becomes critical."
+    rag_tags: ["dehydration"]
+    next: "urine_check"
+
+  urine_check:
+    id: "urine_check"
+    type: "question"
+    question: "Have they urinated in the last 8 hours? Is urine very dark?"
+    options:
+      - response_match: ["no", "not peeing", "none", "dark", "very dark"]
+        next: "worsening"
+      - response_match: ["yes", "some", "light", "normal"]
+        next: "continue"
+
+  worsening:
+    id: "worsening"
+    type: "escalate"
+    message: "SEVERE DEHYDRATION RISK. Keep giving ORS in tiny frequent sips. Keep them cool and resting. Monitor for confusion, very fast breathing, or fainting. This needs medical care when reachable — send someone for help now."
+    critical: true
+
+  critical_dehydration:
+    id: "critical_dehydration"
+    type: "escalate"
+    message: "CRITICAL DEHYDRATION. Protect airway first. Do NOT force fluids if they cannot swallow safely. Place on their side, keep them cool, and monitor breathing. If they can swallow later, start tiny sips of ORS. Send someone for urgent help."
+    critical: true
+
+  continue:
+    id: "continue"
+    type: "instruction"
+    instruction: "Continue ORS until urine becomes lighter and dizziness improves. Eat salty foods if available. Avoid alcohol. If diarrhea continues, keep replacing fluids — dehydration kills faster than hunger."
+    rag_tags: ["dehydration"]
+    terminal: true

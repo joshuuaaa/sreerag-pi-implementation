@@ -78,13 +78,13 @@ nodes:
   escalate_unconscious:
     id: "escalate_unconscious"
     type: "escalate"
-    message: "⚠️ CALL EMERGENCY SERVICES NOW! The person is unconscious. After calling, I'll guide you through CPR if needed."
+    message: "⚠️ UNCONSCIOUS PERSON. Send someone for help immediately if possible. Check their breathing NOW — tilt head back, look, listen, feel for 10 seconds. If not breathing, start CPR. Tell me what you find."
     critical: true
     
   escalate_severe:
     id: "escalate_severe"
     type: "escalate"
-    message: "⚠️ This is life-threatening. CALL 911 IMMEDIATELY. Keep pressure on the wound while you call."
+    message: "⚠️ LIFE-THREATENING BLEED. Do NOT remove your hands. If blood soaks through, press harder — add more material on top. If you have a belt, tie it tightly 2–3 inches above the wound as a tourniquet. Send someone for any available help. Do NOT stop pressure."
     critical: true
     
   find_materials:
@@ -124,6 +124,6 @@ nodes:
   increase_pressure:
     id: "increase_pressure"
     type: "instruction"
-    instruction: "Press harder and consider adding another cloth on top. If bleeding continues after 10 minutes of firm pressure, call for medical help."
+    instruction: "Press harder and add another cloth layer on top — do NOT lift the first one. If bleeding continues after 10 minutes of firm pressure, improvise a tourniquet: tie fabric tightly 2–3 inches above the wound and twist until bleeding slows."
     next: "moderate_monitor"
 

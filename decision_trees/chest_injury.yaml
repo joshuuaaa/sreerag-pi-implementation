@@ -1,0 +1,77 @@
+tree_id: chest_injury_protocol
+description: Chest injury assessment and field management
+start: root
+
+nodes:
+  root:
+    type: question
+    text: "Is the person breathing?"
+    options:
+      yes: check_open_wound
+      no: airway_first
+
+  airway_first:
+    type: action
+    text: "Not breathing. Open airway — tilt head, lift chin. Start CPR — 30 compressions, 2 rescue breaths. Do not stop."
+    next: resuscitate_chest
+
+  resuscitate_chest:
+    type: question
+    text: "Has breathing resumed?"
+    options:
+      yes: check_open_wound
+      no: continue_cpr_chest
+
+  continue_cpr_chest:
+    type: escalate
+    text: "Continue CPR. Send someone for any available help. Do not stop."
+
+  check_open_wound:
+    type: question
+    text: "Is there an open wound on the chest (you can hear air sucking in)?"
+    options:
+      yes: seal_wound
+      no: check_rib_fracture
+
+  seal_wound:
+    type: action
+    text: "Seal the chest wound. Cover with any non-porous material (plastic bag, cling film). Tape THREE sides only — leave the fourth side open to allow air to escape. This prevents tension pneumothorax."
+    next: monitor_after_seal
+
+  monitor_after_seal:
+    type: question
+    text: "After sealing, is breathing getting WORSE (more difficulty, neck veins bulging, trachea shifted to one side)?"
+    options:
+      yes: tension_pneumo
+      no: ongoing_monitor
+
+  tension_pneumo:
+    type: escalate
+    text: "TENSION PNEUMOTHORAX. Lift the unsealed side of the dressing immediately to release trapped air. Keep releasing until breathing improves. This is life-threatening — send for any available help urgently."
+
+  check_rib_fracture:
+    type: question
+    text: "Sharp chest pain that worsens on breathing, worse on one side?"
+    options:
+      yes: rib_fracture_care
+      no: ongoing_monitor
+
+  rib_fracture_care:
+    type: action
+    text: "Likely rib fracture. Have them sit upright at 45 degrees, leaning slightly toward the injured side. Support the chest with gentle hand pressure when coughing. Do NOT tightly bandage the chest."
+    next: ongoing_monitor
+
+  ongoing_monitor:
+    type: question
+    text: "Is breathing becoming rapidly worse, skin turning blue, or person losing consciousness?"
+    options:
+      yes: deteriorating_chest
+      no: stable_chest
+
+  deteriorating_chest:
+    type: escalate
+    text: "Deteriorating rapidly. If sealed wound: lift unsealed corner to release pressure. Keep airway open. If breathing stops: CPR. Send for any available help immediately."
+
+  stable_chest:
+    type: action
+    text: "Stable. Keep in upright or injured-side lean position. Monitor breathing every 5 minutes. A person with chest injury can deteriorate quickly — check frequently. Seek medical care as soon as reachable."

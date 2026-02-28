@@ -1,0 +1,55 @@
+tree_id: snake_bite_protocol
+description: Snakebite assessment and field management
+start: root
+
+nodes:
+  root:
+    type: action
+    text: "Lay the person flat. Keep them completely still — movement spreads venom. Remove rings, watches, tight clothing near bite site. Cover bite with a clean dry dressing. Do NOT manipulate the wound."
+    next: check_systemic
+
+  check_systemic:
+    type: question
+    text: "Any of these present? Drooping eyelids, muscle weakness, difficulty swallowing or breathing, confusion."
+    options:
+      yes: neurotoxic_signs
+      no: check_local
+
+  neurotoxic_signs:
+    type: action
+    text: "Neurotoxic envenomation (nerve venom). Apply PRESSURE IMMOBILISATION: wrap the entire bitten limb firmly from fingers/toes upward with a crepe bandage (firm as a sprained ankle, not a tourniquet). Immobilise with splint. Keep limb BELOW heart level."
+    next: monitor_breathing
+
+  check_local:
+    type: question
+    text: "Significant swelling, bruising, or blistering developing at the bite site?"
+    options:
+      yes: cytotoxic_signs
+      no: monitor_general
+
+  cytotoxic_signs:
+    type: action
+    text: "Cytotoxic (tissue) signs. Do NOT apply pressure bandage — it concentrates tissue-destroying venom. Keep limb below heart level, still and splinted. Mark the edge of swelling with a pen and time to track spread."
+    next: monitor_general
+
+  monitor_general:
+    type: question
+    text: "Note for clear reference: Was pressure immobilisation applied?"
+    options:
+      yes: monitor_breathing
+      no: monitor_breathing
+
+  monitor_breathing:
+    type: question
+    text: "Is breathing becoming laboured or very slow?"
+    options:
+      yes: breathing_emergency
+      no: stable_snakebite
+
+  breathing_emergency:
+    type: escalate
+    text: "Respiratory failure from venom. If breathing stops: CPR immediately. Do NOT stop. Send for any available help now — antivenom is the only definitive treatment."
+
+  stable_snakebite:
+    type: action
+    text: "Keep still, calm, and warm. Do NOT give alcohol, aspirin, or ibuprofen. Monitor every 10 minutes — systemic signs can develop up to 2 hours after the bite. Note snake appearance if safely observable. Seek medical care as soon as reachable."

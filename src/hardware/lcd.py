@@ -6,7 +6,10 @@ Supports I2C 16x2 character displays
 
 from RPLCD.i2c import CharLCD
 import time
+import logging
 from typing import Optional, Dict
+
+logger = logging.getLogger("hardware.lcd")
 
 class ConversationLCD:
     def __init__(self, i2c_address: int = 0x27, cols: int = 16, rows: int = 2):
@@ -34,10 +37,10 @@ class ConversationLCD:
                 auto_linebreaks=True
             )
             self.lcd.clear()
-            print(f"✅ LCD initialized at 0x{i2c_address:02x} ({cols}x{rows})")
+            logger.info("LCD initialized at 0x%02x (%sx%s)", i2c_address, cols, rows)
         except Exception as e:
-            print(f"❌ LCD initialization failed: {e}")
-            print("   Continuing without LCD...")
+            logger.warning("LCD initialization failed: %s", e)
+            logger.info("Continuing without LCD")
             
     def show_state(self, state: str):
         """
@@ -68,8 +71,7 @@ class ConversationLCD:
             line2: Second line text (optional)
         """
         if not self.lcd:
-            # Fallback to console
-            print(f"LCD: {line1} | {line2}")
+            logger.debug("LCD fallback: %s | %s", line1, line2)
             return
             
         try:
@@ -79,7 +81,7 @@ class ConversationLCD:
                 self.lcd.crlf()
                 self.lcd.write_string(line2[:self.cols])
         except Exception as e:
-            print(f"❌ LCD error: {e}")
+            logger.error("LCD error: %s", e)
             
     def show_analysis(self, analysis: dict):
         """
@@ -129,4 +131,4 @@ class ConversationLCD:
                 self.lcd.write_string(padded[i:i+self.cols])
                 time.sleep(delay)
         except Exception as e:
-            print(f"❌ Scroll error: {e}")
+            logger.error("LCD scroll error: %s", e)

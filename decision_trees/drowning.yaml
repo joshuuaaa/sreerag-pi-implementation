@@ -1,0 +1,88 @@
+tree_id: drowning_protocol
+description: Drowning and near-drowning field response
+start: root
+
+nodes:
+  root:
+    type: question
+    text: "Is the person out of the water?"
+    options:
+      yes: check_breathing
+      no: water_rescue
+
+  water_rescue:
+    type: action
+    text: "Do NOT enter deep or moving water. Reach with a rope, belt, stick, or throw a floating object. Pull them to safety. Protect the neck if diving is suspected."
+    next: check_breathing
+
+  check_breathing:
+    type: question
+    text: "Are they breathing?"
+    options:
+      yes: conscious_check
+      no: rescue_breaths
+
+  rescue_breaths:
+    type: action
+    text: "For drowning, give RESCUE BREATHS FIRST. Tilt head, pinch nose. Give 5 initial breaths. Check for pulse."
+    next: check_pulse
+
+  check_pulse:
+    type: question
+    text: "Is there a pulse?"
+    options:
+      yes: breaths_only
+      no: full_cpr
+
+  breaths_only:
+    type: action
+    text: "Pulse present but not breathing. Give 1 rescue breath every 5 seconds. Recheck pulse every 2 minutes."
+    next: recheck_breathing
+
+  full_cpr:
+    type: action
+    text: "No pulse. Start CPR — 30 compressions then 2 breaths. Continue until breathing resumes. Drowning victims can recover with prolonged CPR."
+    next: recheck_breathing
+
+  recheck_breathing:
+    type: question
+    text: "Has breathing resumed?"
+    options:
+      yes: recovery_position
+      no: continue_resuscitate
+
+  continue_resuscitate:
+    type: escalate
+    text: "Continue CPR. Send someone for any available help. Do not stop — drowning victims can survive prolonged resuscitation."
+
+  recovery_position:
+    type: action
+    text: "Breathing resumed. Place in recovery position on their side. Remove wet clothing, insulate with blankets or dry clothing — drowning causes rapid heat loss."
+    next: monitor_breathing
+
+  conscious_check:
+    type: question
+    text: "Are they conscious and speaking?"
+    options:
+      yes: awake_care
+      no: recovery_position
+
+  awake_care:
+    type: action
+    text: "Conscious and breathing. Remove wet clothing, keep warm. Have them rest completely. Monitor closely."
+    next: monitor_breathing
+
+  monitor_breathing:
+    type: question
+    text: "Over the next 30 minutes, is breathing worsening (more coughing, laboured breathing, confusion)?"
+    options:
+      yes: secondary_drowning
+      no: stable_drowning
+
+  secondary_drowning:
+    type: escalate
+    text: "Secondary drowning developing. Lay flat, keep airway open, give rescue breaths if breathing fails. Send someone for any available help immediately."
+
+  stable_drowning:
+    type: action
+    text: "Stable now. Continue 15-minute checks for 6 hours — secondary drowning can develop hours later. Seek medical care as soon as reachable."

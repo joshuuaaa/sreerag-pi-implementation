@@ -49,13 +49,13 @@ nodes:
   start_cpr_call:
     id: "start_cpr_call"
     type: "escalate"
-    message: "CALL 911 NOW if not done. Start chest compressions immediately — place both hands on the center of their chest and push down hard and fast, 100-120 times per minute. Do not stop."
+    message: "START CHEST COMPRESSIONS NOW. Place both hands on the center of their chest. Push down hard and fast — 100 to 120 per minute. Every second counts. If someone else is present, send them to find any available rescuer or radio for help. Do NOT stop compressions."
     critical: true
 
   recovery_position:
     id: "recovery_position"
     type: "instruction"
-    instruction: "The person is breathing but unconscious. Roll them onto their side — recovery position. Tilt their head back to keep airway open. Stay with them and monitor breathing until help arrives."
+    instruction: "The person is breathing but unconscious. Roll them onto their side — recovery position. Tilt their head back to keep the airway open. Stay with them, monitor breathing every 30 seconds, and keep them warm. You are their lifeline right now."
     rag_tags: ["unconscious", "airway", "recovery_position"]
     next: "monitor_breathing"
 
@@ -72,7 +72,7 @@ nodes:
   await_help:
     id: "await_help"
     type: "instruction"
-    instruction: "Good. Keep them on their side, head tilted back. Keep them warm with a blanket. Talk to them calmly. Monitor breathing every 30 seconds until emergency services arrive."
+    instruction: "Good. Keep them on their side, head tilted back. Keep them warm with a blanket or clothing. Talk to them calmly and check breathing every 30 seconds. If breathing stops at any point, start compressions immediately. You are keeping them alive."
     rag_tags: ["recovery_position", "unconscious"]
     terminal: true
 
@@ -97,19 +97,19 @@ nodes:
   choking_resolved:
     id: "choking_resolved"
     type: "instruction"
-    instruction: "The airway is clear. Encourage them to cough fully. Sit them down and keep them calm. Seek medical evaluation — abdominal thrusts can cause internal bruising."
+    instruction: "The airway is clear. Encourage them to cough fully. Sit them down and keep them calm. Watch for the next 24 hours — abdominal thrusts can cause internal bruising. Signs to watch for: worsening abdominal pain, difficulty breathing returning, or vomiting blood. Seek medical care when it becomes available."
     terminal: true
 
   choking_unconscious:
     id: "choking_unconscious"
     type: "escalate"
-    message: "Lower them carefully to the floor. Call 911. Begin CPR — look in mouth before each rescue breath and remove any visible object. Do NOT do blind finger sweeps."
+    message: "Lower them carefully to the floor. Begin CPR immediately — look in the mouth before each rescue breath and remove any visible object. Do NOT do blind finger sweeps. Send someone to find help while you work. Do NOT stop."
     critical: true
 
   escalate_monitor:
     id: "escalate_monitor"
     type: "instruction"
-    instruction: "Keep them calm and still. Call 911 if not done. Monitor their breathing and pulse. Tell me if anything changes."
+    instruction: "Keep them calm and still. Send someone for help if anyone is reachable. Monitor their breathing and pulse. Tell me immediately if anything changes."
     rag_tags: ["unconscious", "monitoring"]
     terminal: false
     next: "monitor_breathing"

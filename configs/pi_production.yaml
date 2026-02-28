@@ -5,6 +5,10 @@ app:
   name: "Crisis Assistant"
   version: "2.0"
   prompt_style: "warm"
+  clean_terminal_ui: true
+  console_logs: false
+  display_cols: 53      # 3.5" TFT terminal width (480×320 @ 8px font)
+  display_rows: 30      # 3.5" TFT terminal height
 
 hardware:
   button_pin: 16

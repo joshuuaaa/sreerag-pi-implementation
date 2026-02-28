@@ -1,0 +1,71 @@
+# decision_trees/heat_illness.yaml
+
+tree_id: "heat_illness_protocol"
+version: "1.0"
+description: "Heat exhaustion / heat stroke protocol (austere environment)"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Is the person confused, unconscious, or having a seizure?"
+    critical: true
+    options:
+      - response_match: ["yes", "confused", "unconscious", "passed out", "seizure", "seizing"]
+        next: "heat_stroke_critical"
+      - response_match: ["no", "awake", "responsive", "talking"]
+        next: "cool_now"
+
+  cool_now:
+    id: "cool_now"
+    type: "instruction"
+    instruction: "Move them to shade immediately. Loosen clothing. Start cooling NOW: pour cool water on skin, fan strongly, and put cool wet cloths on neck, armpits, and groin."
+    rag_tags: ["heat_illness", "first_aid"]
+    next: "hydration_check"
+    critical: true
+
+  hydration_check:
+    id: "hydration_check"
+    type: "question"
+    question: "Can they swallow and keep fluids down (no repeated vomiting)?"
+    options:
+      - response_match: ["yes", "can swallow", "okay", "no vomiting"]
+        next: "rehydrate"
+      - response_match: ["no", "vomiting", "can't swallow", "choking"]
+        next: "no_oral_fluids"
+
+  rehydrate:
+    id: "rehydrate"
+    type: "instruction"
+    instruction: "Give small sips every minute. Water is good. Better: oral rehydration mix (1 liter clean water + 6 level teaspoons sugar + 1/2 teaspoon salt). Keep cooling until they improve."
+    rag_tags: ["heat_illness", "dehydration"]
+    next: "improving"
+
+  no_oral_fluids:
+    id: "no_oral_fluids"
+    type: "escalate"
+    message: "HIGH RISK HEAT ILLNESS. Do NOT force fluids by mouth. Keep cooling aggressively and place them on their side if vomiting. Monitor breathing. Send someone for any available medical help."
+    critical: true
+
+  heat_stroke_critical:
+    id: "heat_stroke_critical"
+    type: "escalate"
+    message: "POSSIBLE HEAT STROKE. This can kill quickly. Start rapid cooling NOW: soak clothing with cool water, fan hard, apply cold wet cloths to neck/armpits/groin. Keep airway open. If seizure: protect head, do not restrain. Send someone for urgent help."
+    critical: true
+
+  improving:
+    id: "improving"
+    type: "question"
+    question: "After 10 minutes of cooling, are they more alert and less dizzy?"
+    options:
+      - response_match: ["yes", "better", "improving", "more alert"]
+        next: "rest_monitor"
+      - response_match: ["no", "worse", "still dizzy", "confused"]
+        next: "heat_stroke_critical"
+
+  rest_monitor:
+    id: "rest_monitor"
+    type: "instruction"
+    instruction: "Keep them resting in shade. Continue small sips and cooling as needed. No exertion for the rest of the day. Watch for confusion, fainting, or vomiting — if any appear, treat as heat stroke and cool aggressively."
+    rag_tags: ["heat_illness"]
+    terminal: true

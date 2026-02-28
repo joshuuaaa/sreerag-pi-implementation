@@ -26,7 +26,13 @@ except ImportError:
 
 
 # ── Phi-3 stop / special tokens ───────────────────────────────────────────────
-_PHI3_STOP = ["<|end|>", "<|user|>", "<|system|>", "<|endoftext|>"]
+_PHI3_STOP = [
+    "<|end|>", "<|user|>", "<|system|>", "<|endoftext|>",
+    # Prevent the model from roleplaying user responses
+    "\nUser:", "\nuser:", "\nHuman:", "\nhuman:",
+    "\nPerson:", "\nperson:", "\nSupport:", "\nsupport:",
+    "\nPatient:", "\npatient:", "\nYou:",
+]
 
 
 class LLMEngine:
@@ -172,6 +178,12 @@ class LLMEngine:
         # Remove any leaked special tokens
         for tok in _PHI3_STOP:
             text = text.replace(tok, "")
+        # Cut off anything that looks like a simulated user/patient reply
+        # e.g. "support: Yes...", "User: I'm doing it", "Patient: okay"
+        text = re.split(
+            r"(?i)\b(user|human|person|patient|support|you)\s*:",
+            text,
+        )[0]
         # Collapse multiple newlines / spaces
         text = re.sub(r"\n{2,}", " ", text)
         text = re.sub(r" {2,}", " ", text)

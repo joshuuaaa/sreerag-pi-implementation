@@ -1,0 +1,78 @@
+tree_id: head_injury_protocol
+description: Head injury assessment and field management
+start: root
+
+nodes:
+  root:
+    type: question
+    text: "Is the person conscious and responsive?"
+    options:
+      yes: check_severity
+      no: unconscious_head
+
+  unconscious_head:
+    type: question
+    text: "Are they breathing?"
+    options:
+      yes: recovery_spinal
+      no: cpr_head
+
+  cpr_head:
+    type: action
+    text: "Not breathing. Start CPR now — 30 compressions, 2 rescue breaths. Minimise neck movement while doing so."
+    next: cpr_monitor
+
+  cpr_monitor:
+    type: question
+    text: "Did breathing resume?"
+    options:
+      yes: recovery_spinal
+      no: continue_cpr
+
+  continue_cpr:
+    type: action
+    text: "Continue CPR. Send someone for any available help. Do not stop until breathing resumes or someone takes over."
+
+  recovery_spinal:
+    type: action
+    text: "Breathing but unconscious. Log-roll onto side (recovery position) while protecting neck alignment. Support head with hands. Monitor breathing every 2 minutes."
+    next: monitor_head
+
+  check_severity:
+    type: question
+    text: "Are any of these present? Repeated vomiting, unequal pupils, skull deformity, confusion getting worse, or clear fluid from nose/ears."
+    options:
+      yes: serious_injury
+      no: mild_injury
+
+  serious_injury:
+    type: action
+    text: "Serious brain injury signs present. Keep person STILL and flat. Do NOT give food or fluids. Control any bleeding with pressure AROUND (not over) skull deformity. Send someone for any available medical help NOW."
+    next: monitor_head
+
+  mild_injury:
+    type: question
+    text: "Do they have: headache, dizziness, brief confusion, or memory gap around the event (concussion signs)?"
+    options:
+      yes: concussion_care
+      no: monitor_head
+
+  concussion_care:
+    type: action
+    text: "Concussion. Keep them resting completely. No exertion, no screens. Give water. Monitor closely for 24 hours — if symptoms worsen, treat as serious injury."
+    next: monitor_head
+
+  monitor_head:
+    type: question
+    text: "Over the next 10 minutes, is their condition worsening (more confusion, new vomiting, drowsiness)?"
+    options:
+      yes: deteriorating
+      no: stable_head
+
+  deteriorating:
+    type: escalate
+    text: "Condition deteriorating — worsening brain pressure. Keep still and flat. Send someone for any available help immediately. Monitor airway."
+
+  stable_head:
+    type: action
+    text: "Stable for now. Continue 10-minute checks. Keep them resting. Seek medical care as soon as reachable — imaging is required to confirm injury."

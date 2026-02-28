@@ -4,6 +4,7 @@ Main orchestrator - coordinates all AI components
 """
 
 import time
+import logging
 from typing import Dict, Any, Optional
 from src.session.manager import ConversationSession
 from src.analyzer.situation_analyzer import SituationAnalyzer
@@ -11,6 +12,8 @@ from src.decision.engine import DecisionEngine
 from src.llm.engine import LLMEngine
 from src.rag.engine import RAGEngine
 from src.prompt.styles import build_prompt
+
+logger = logging.getLogger("orchestrator")
 
 class IntelligentOrchestrator:
     def __init__(self, config: dict):
@@ -20,7 +23,7 @@ class IntelligentOrchestrator:
         Args:
             config: Full system configuration
         """
-        print("🔄 Initializing AI Orchestrator...")
+        logger.info("Initializing AI Orchestrator")
         
         # Initialize components
         self.llm = LLMEngine(config.get("llm", {}))
@@ -36,7 +39,7 @@ class IntelligentOrchestrator:
         # Single session (no persistence)
         self.current_session: Optional[ConversationSession] = None
         
-        print("✅ Orchestrator ready")
+        logger.info("Orchestrator ready")
         
     def start_session(self) -> str:
         """
@@ -74,7 +77,11 @@ class IntelligentOrchestrator:
             new_message=user_message
         )
         
-        print(f"📊 Analysis: {analysis['phase']} | Conditions: {[c['type'] for c in analysis['conditions']]}")
+        logger.debug(
+            "Analysis: phase=%s conditions=%s",
+            analysis["phase"],
+            [c["type"] for c in analysis["conditions"]],
+        )
         
         # STEP 2: Determine response based on phase
         if analysis["phase"] == "initial_assessment":
@@ -168,9 +175,16 @@ class IntelligentOrchestrator:
         
         # Check for critical situations
         if self._is_critical(analysis):
+            primary = analysis.get("primary_condition", "emergency")
+            decision_result = self.decision.navigate(
+                emergency_type=primary,
+                session=self.current_session,
+                user_response=message
+            )
             return {
-                "response": "This is life-threatening. Call 911 immediately if you haven't already. While waiting, I'll guide you through critical steps.",
-                "lcd_display": "CALL 911 NOW",
+                "response": decision_result.get("message", 
+                    "This is life-threatening. Act now: check airway, control bleeding, treat for shock. Send someone for any available help."),
+                "lcd_display": "CRITICAL",
                 "state": "critical"
             }
         
@@ -247,7 +261,7 @@ class IntelligentOrchestrator:
         response = self.llm.generate_chat(
             system_prompt=self.system_prompt,
             messages=messages,
-            max_tokens=100,
+            max_tokens=200,
         )
 
         if not response or len(response.strip()) < 5:

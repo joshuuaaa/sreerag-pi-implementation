@@ -5,8 +5,11 @@ Piper Text-to-Speech wrapper
 
 import subprocess
 import os
+import logging
 import tempfile
 from typing import Optional
+
+logger = logging.getLogger("audio.tts")
 
 class PiperTTS:
     def __init__(self, config: dict):
@@ -25,9 +28,9 @@ class PiperTTS:
         if not os.path.exists(self.piper_bin):
             raise FileNotFoundError(f"Piper binary not found: {self.piper_bin}")
             
-        print(f"✅ Piper TTS initialized")
-        print(f"   Model: {self.model_path}")
-        print(f"   Binary: {self.piper_bin}")
+        logger.info("Piper TTS initialized")
+        logger.debug("Piper model: %s", self.model_path)
+        logger.debug("Piper binary: %s", self.piper_bin)
         
     def synthesize(self, text: str) -> Optional[str]:
         """
@@ -40,13 +43,13 @@ class PiperTTS:
             Path to generated WAV file, or None on error
         """
         if not text or len(text.strip()) == 0:
-            print("⚠️ Empty text, skipping TTS")
+            logger.warning("Empty text, skipping TTS")
             return None
             
         # Create temp file
         output_file = tempfile.mktemp(suffix=".wav", prefix="tts_")
         
-        print(f"🔊 Synthesizing: '{text[:50]}...'")
+        logger.info("Synthesizing speech")
         
         try:
             # Run Piper
@@ -66,18 +69,18 @@ class PiperTTS:
             
             # Check if file was created
             if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
-                print(f"✅ TTS generated: {output_file}")
+                logger.info("TTS generated audio: %s", output_file)
                 return output_file
             else:
-                print(f"❌ TTS failed to generate audio")
+                logger.error("TTS failed to generate audio")
                 if stderr:
-                    print(f"   Error: {stderr.decode()}")
+                    logger.error("Piper stderr: %s", stderr.decode(errors="ignore"))
                 return None
                 
         except subprocess.TimeoutExpired:
-            print("❌ Piper timeout")
+            logger.error("Piper timeout")
             process.kill()
             return None
         except Exception as e:
-            print(f"❌ Piper error: {e}")
+            logger.error("Piper error: %s", e)
             return None

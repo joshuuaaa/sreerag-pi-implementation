@@ -1,0 +1,72 @@
+# decision_trees/seizure.yaml
+
+tree_id: "seizure_protocol"
+version: "1.0"
+description: "Seizure / convulsions protocol"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Is the person actively shaking/convulsing right now?"
+    critical: true
+    options:
+      - response_match: ["yes", "shaking", "convulsing", "seizing", "now"]
+        next: "protect"
+      - response_match: ["no", "stopped", "after", "ended"]
+        next: "aftercare"
+
+  protect:
+    id: "protect"
+    type: "instruction"
+    instruction: "Protect them from injury. Clear hard objects away. Cushion the head with clothing. Loosen tight clothing around the neck. Do NOT hold them down. Do NOT put anything in their mouth."
+    rag_tags: ["seizure", "first_aid"]
+    next: "timing"
+    critical: true
+
+  timing:
+    id: "timing"
+    type: "question"
+    question: "How long has the seizure lasted so far? Under 5 minutes, or 5 minutes or more?"
+    critical: true
+    options:
+      - response_match: ["under", "1", "2", "3", "4", "minutes", "<5"]
+        next: "wait"
+      - response_match: ["5", "six", "7", "8", "9", "10", "more", ">=5", "over"]
+        next: "status_epilepticus"
+
+  wait:
+    id: "wait"
+    type: "instruction"
+    instruction: "Stay with them. When the shaking stops, roll them onto their side (recovery position) to keep airway open. Check breathing. They may be confused or sleepy — this is normal."
+    rag_tags: ["seizure", "airway"]
+    next: "aftercare"
+
+  status_epilepticus:
+    id: "status_epilepticus"
+    type: "escalate"
+    message: "SEIZURE > 5 MINUTES is life-threatening. Keep protecting the head and airway. After shaking stops, recovery position and check breathing. If breathing stops, start CPR. Send someone for urgent medical help immediately."
+    critical: true
+
+  aftercare:
+    id: "aftercare"
+    type: "question"
+    question: "After the seizure: are they breathing normally and waking up?"
+    options:
+      - response_match: ["yes", "breathing", "waking", "awake", "okay"]
+        next: "monitor"
+      - response_match: ["no", "not breathing", "blue", "unconscious"]
+        next: "critical_breathing"
+
+  critical_breathing:
+    id: "critical_breathing"
+    type: "escalate"
+    message: "NOT BREATHING NORMALLY. Open airway and check for 10 seconds. If not breathing, start CPR. If vomiting, keep them on their side. Send someone for help now."
+    critical: true
+
+  monitor:
+    id: "monitor"
+    type: "instruction"
+    instruction: "Keep them on their side until fully alert. Do not give food or drink until they can swallow normally. Check for injuries, especially head injury. If a second seizure happens soon, treat as critical and seek urgent care."
+    rag_tags: ["seizure"]
+    terminal: true

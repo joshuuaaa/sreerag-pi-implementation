@@ -5,7 +5,10 @@ Whisper.cpp Speech-to-Text wrapper
 
 import subprocess
 import os
+import logging
 from typing import Optional
+
+logger = logging.getLogger("audio.stt")
 
 class WhisperSTT:
     def __init__(self, config: dict):
@@ -25,9 +28,9 @@ class WhisperSTT:
         if not os.path.exists(self.whisper_bin):
             raise FileNotFoundError(f"Whisper binary not found: {self.whisper_bin}")
             
-        print(f"✅ Whisper STT initialized")
-        print(f"   Model: {self.model_path}")
-        print(f"   Binary: {self.whisper_bin}")
+        logger.info("Whisper STT initialized")
+        logger.debug("Whisper model: %s", self.model_path)
+        logger.debug("Whisper binary: %s", self.whisper_bin)
         
     def transcribe(self, audio_file: str) -> str:
         """
@@ -40,10 +43,10 @@ class WhisperSTT:
             Transcribed text
         """
         if not os.path.exists(audio_file):
-            print(f"❌ Audio file not found: {audio_file}")
+            logger.error("Audio file not found: %s", audio_file)
             return ""
             
-        print(f"📝 Transcribing: {audio_file}")
+        logger.info("Transcribing audio: %s", audio_file)
         
         try:
             # Run whisper.cpp
@@ -74,12 +77,13 @@ class WhisperSTT:
             if lines:
                 text = lines[-1]
             
-            print(f"✅ Transcribed: '{text}'")
+            logger.info("Transcription complete")
+            logger.debug("Transcribed text: %s", text)
             return text
             
         except subprocess.TimeoutExpired:
-            print("❌ Whisper timeout")
+            logger.error("Whisper timeout")
             return ""
         except Exception as e:
-            print(f"❌ Whisper error: {e}")
+            logger.error("Whisper error: %s", e)
             return ""

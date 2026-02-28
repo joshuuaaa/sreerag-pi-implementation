@@ -1,0 +1,89 @@
+tree_id: poisoning_protocol
+description: Poisoning assessment and field management
+start: root
+
+nodes:
+  root:
+    type: question
+    text: "Is the area safe? (No toxic fumes, no chemical spill danger to you)"
+    options:
+      yes: check_responsive
+      no: move_to_safety
+
+  move_to_safety:
+    type: action
+    text: "Move the person to fresh air without exposing yourself. If chemical spill: protect your skin, do not enter without cover."
+    next: check_responsive
+
+  check_responsive:
+    type: question
+    text: "Is the person conscious and responsive?"
+    options:
+      yes: identify_type
+      no: unconscious_poison
+
+  unconscious_poison:
+    type: question
+    text: "Are they breathing?"
+    options:
+      yes: recovery_poison
+      no: cpr_poison
+
+  cpr_poison:
+    type: action
+    text: "Not breathing. Start CPR — 30 compressions, 2 breaths. If chemical on face, compression-only CPR is acceptable. Do not stop."
+    next: cpr_check
+
+  cpr_check:
+    type: question
+    text: "Has breathing resumed?"
+    options:
+      yes: recovery_poison
+      no: continue_cpr_poison
+
+  continue_cpr_poison:
+    type: escalate
+    text: "Continue CPR. Send someone for any available help. Do not stop."
+
+  recovery_poison:
+    type: action
+    text: "Unconscious but breathing. Place in recovery position. Keep airway open. Monitor closely every 2 minutes."
+    next: monitor_poison
+
+  identify_type:
+    type: question
+    text: "How did the poisoning occur?"
+    options:
+      ingested: ingested_care
+      skin_contact: skin_care
+      inhaled: inhaled_care
+
+  ingested_care:
+    type: action
+    text: "Swallowed poison. DO NOT induce vomiting — especially dangerous with corrosives or chemicals. Rinse mouth with water and spit. Note the substance and amount. Give water to dilute if person is fully conscious and able to swallow."
+    next: monitor_poison
+
+  skin_care:
+    type: action
+    text: "Chemical on skin. Remove contaminated clothing (protect your own skin). Flush affected skin with large volumes of clean water for 20 minutes. Do not try to neutralise the chemical."
+    next: monitor_poison
+
+  inhaled_care:
+    type: action
+    text: "Inhaled fumes. Fresh air environment. Keep completely at rest — any exertion worsens symptoms. For carbon monoxide: fresh air and rest are the field treatment."
+    next: monitor_poison
+
+  monitor_poison:
+    type: question
+    text: "Is condition worsening (more confusion, seizures, severe vomiting, breathing difficulty)?"
+    options:
+      yes: deteriorating_poison
+      no: stable_poison
+
+  deteriorating_poison:
+    type: escalate
+    text: "Worsening poisoning. Keep airway clear. Recovery position if losing consciousness. If seizure: protect from injury, do not restrain. Send for any available help immediately."
+
+  stable_poison:
+    type: action
+    text: "Stable. Keep resting, monitor every 10 minutes. Record all details about the substance (name, amount, time). This information is critical when medical care is reached."

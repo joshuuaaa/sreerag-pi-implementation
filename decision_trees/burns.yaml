@@ -69,14 +69,14 @@ nodes:
   second_degree_care:
     id: "second_degree_care"
     type: "instruction"
-    instruction: "After 20 minutes of cooling: cover loosely with a sterile non-stick dressing or cling wrap laid lengthwise. Do NOT wrap tightly. Keep them warm — burn victims lose heat fast. Seek medical evaluation today."
+    instruction: "After 20 minutes of cooling: cover loosely with a sterile non-stick dressing or cling wrap laid lengthwise. Do NOT wrap tightly. Keep them warm — burn victims lose heat fast. Monitor the burn daily for infection: spreading redness, swelling, pus, or fever. Seek medical care when it becomes available."
     rag_tags: ["burns", "second_degree", "wound_care"]
     terminal: true
 
   third_degree:
     id: "third_degree"
     type: "escalate"
-    message: "CALL 911 IMMEDIATELY. This is a serious full-thickness burn. Do NOT remove clothing stuck to the burn. Cover loosely with a clean dry cloth and keep the person warm and still until help arrives."
+    message: "SEVERE FULL-THICKNESS BURN. Do NOT remove clothing stuck to the burn. Cover loosely with a clean dry cloth. Keep the person warm, flat, and still — severe burns cause shock. Do NOT apply water, ice, or ointment. Send someone for any available medical help. Monitor breathing continuously."
     critical: true
 
   chemical_burn:
@@ -90,15 +90,17 @@ nodes:
   chemical_followup:
     id: "chemical_followup"
     type: "instruction"
-    instruction: "Continue flushing for the full 20 minutes — this cannot be shortened. For eye exposure, keep the eye open and flush with water. Call 911 for all chemical burns and tell them what chemical was involved."
+    instruction: "Continue flushing for the full 20 minutes — this cannot be shortened. For eye exposure, keep the eye open and flush with water continuously. After flushing, cover with a clean cloth. Note the chemical name for future medical treatment. Send someone for any available help immediately."
     rag_tags: ["burns", "chemical_burn"]
     next: "escalate_burn"
     critical: true
 
   electrical_burn:
     id: "electrical_burn"
+  electrical_burn:
+    id: "electrical_burn"
     type: "escalate"
-    message: "CALL 911 NOW. First: ensure the person is NOT still in contact with the electricity source — do NOT touch them until power is off. Electrical burns cause massive internal damage. Be ready to perform CPR."
+    message: "ELECTRICAL BURN. First: ensure the person is NOT still in contact with the electricity source — do NOT touch them until power is confirmed off. Use a dry wooden object to break contact if needed. Electrical burns cause massive hidden internal damage. Keep them still and warm, monitor breathing, and be ready to perform CPR. Send someone for any available help."
     critical: true
 
   minor_burn_care:
@@ -111,5 +113,5 @@ nodes:
   escalate_burn:
     id: "escalate_burn"
     type: "escalate"
-    message: "This burn requires emergency medical care. Call 911 or go to the emergency room now. While waiting: keep cooling if just applied, cover loosely, keep person warm, and monitor breathing."
+    message: "SERIOUS BURN — professional medical care is needed as soon as possible. While working toward that: keep cooling if under 20 minutes since burn, then cover loosely, keep the person warm, monitor breathing, and watch for signs of shock — pale skin, confusion, rapid breathing. Send someone for any available medical help now."
     critical: true

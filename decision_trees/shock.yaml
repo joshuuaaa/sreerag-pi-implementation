@@ -49,7 +49,7 @@ nodes:
   shock_maintain:
     id: "shock_maintain"
     type: "instruction"
-    instruction: "Good. Keep them lying flat with legs raised. Keep them warm and calm. Do NOT give food or water. Talk to them continuously to monitor consciousness. 911 is on the way."
+    instruction: "Good. Keep them lying flat with legs raised. Keep them warm and calm. Do NOT give food or water. Talk to them continuously to monitor consciousness. Send someone for any available help. You must stay with them."
     rag_tags: ["shock"]
     next: "monitor_shock"
 
@@ -103,7 +103,7 @@ nodes:
   second_epi:
     id: "second_epi"
     type: "instruction"
-    instruction: "Use a second EpiPen if available. Call 911 immediately if not done. Keep the person lying flat. Begin CPR if they stop breathing. Anaphylaxis can be biphasic — hospital care is essential even if improving."
+    instruction: "Use a second EpiPen if available. Keep the person lying flat with legs raised. Begin CPR if they stop breathing. Anaphylaxis can be biphasic — symptoms can return within hours even if improving. Continue monitoring and send someone for any available medical help immediately."
     rag_tags: ["shock", "anaphylaxis", "cpr"]
     next: "escalate_shock"
     critical: true
@@ -111,32 +111,32 @@ nodes:
   post_epi_monitoring:
     id: "post_epi_monitoring"
     type: "instruction"
-    instruction: "Even with improvement after EpiPen, call 911 or go to emergency room immediately. Anaphylaxis can return stronger within hours (biphasic reaction). Keep them lying flat, legs raised, and warm until help arrives."
+    instruction: "Even with improvement after EpiPen, this is not over. Anaphylaxis can return stronger within 4–12 hours (biphasic reaction). Keep them lying flat, legs raised, and warm. Monitor breathing every 5 minutes. If symptoms return, use another EpiPen if available and begin CPR if breathing stops. Seek medical care as soon as possible."
     rag_tags: ["shock", "anaphylaxis"]
     terminal: true
 
   anaphylaxis_no_epi:
     id: "anaphylaxis_no_epi"
     type: "escalate"
-    message: "CALL 911 IMMEDIATELY — severe allergic reaction without epinephrine is life-threatening. Lay them flat, raise legs if no breathing difficulty. If they stop breathing, begin CPR. Do NOT give antihistamines — they are not fast enough."
+    message: "SEVERE ALLERGIC REACTION — NO EPINEPHRINE AVAILABLE. Lay them flat immediately and raise their legs. If they can swallow, an antihistamine (diphenhydramine) may slow symptoms but is NOT a substitute. Loosen any tight clothing around the throat. If they stop breathing, begin CPR immediately. Monitor every 2 minutes and send someone for help now."
     critical: true
 
   await_ems:
     id: "await_ems"
     type: "instruction"
-    instruction: "Maintain their position and keep them warm and calm. Monitor their pulse and breathing. Do NOT give food or drink. Update 911 dispatch with any changes in condition as you wait."
+    instruction: "Maintain their position and keep them warm and calm. Monitor their pulse and breathing every 2 minutes. Do NOT give food or drink. Note any changes in breathing, pulse, or skin color to report when medical help is reached. You are their primary care right now."
     rag_tags: ["shock"]
     terminal: true
 
   monitor_closely:
     id: "monitor_closely"
     type: "instruction"
-    instruction: "Watch them closely every 2 minutes. Check pulse, breathing rate, and skin color. Any deterioration — pallor, confusion, rapid breathing — means shock is developing. Call me back or call 911 immediately."
+    instruction: "Watch them closely every 2 minutes. Check pulse, breathing rate, and skin color. Any deterioration — pallor, confusion, rapid breathing, cold clammy skin — means shock is developing. Tell me immediately and we will act. Do not leave them alone."
     rag_tags: ["shock"]
     terminal: true
 
   escalate_shock:
     id: "escalate_shock"
     type: "escalate"
-    message: "CALL 911 IMMEDIATELY if not done. This person is in decompensated shock — keep them flat, warm, and still. If they stop breathing, begin CPR. Update dispatch continuously."
+    message: "DECOMPENSATED SHOCK — this is immediately life-threatening. Keep them flat, legs raised, warm and completely still. Do NOT give fluids by mouth. If breathing stops, begin CPR immediately. Send someone for any available medical help now. Stay with them and tell me any changes."
     critical: true

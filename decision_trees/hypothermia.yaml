@@ -1,0 +1,62 @@
+# decision_trees/hypothermia.yaml
+
+tree_id: "hypothermia_protocol"
+version: "1.0"
+description: "Cold exposure / hypothermia protocol (austere environment)"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Is the person conscious and able to answer you?"
+    critical: true
+    options:
+      - response_match: ["yes", "awake", "responsive", "talking", "conscious"]
+        next: "remove_cold"
+      - response_match: ["no", "unconscious", "not responding", "passed out"]
+        next: "critical_unconscious"
+
+  remove_cold:
+    id: "remove_cold"
+    type: "instruction"
+    instruction: "Get them out of wind and wet RIGHT NOW. Remove wet clothing. Dry the skin. Insulate with blankets, coats, sleeping bag, or dry clothes. Focus on warming the chest, back, neck, and groin."
+    rag_tags: ["hypothermia", "first_aid"]
+    next: "shivering_check"
+    critical: true
+
+  shivering_check:
+    id: "shivering_check"
+    type: "question"
+    question: "Are they shivering hard, or are they NOT shivering / confused / very sleepy?"
+    critical: true
+    options:
+      - response_match: ["shivering", "shaking", "hard", "violent"]
+        next: "rewarm_active"
+      - response_match: ["not shivering", "confused", "sleepy", "drowsy", "slurred", "stumbling"]
+        next: "critical_core_rewarm"
+
+  rewarm_active:
+    id: "rewarm_active"
+    type: "instruction"
+    instruction: "Keep them insulated. If they are fully awake and can swallow: give warm sweet drinks in small sips. No alcohol. No caffeine. Do NOT rub the skin. Keep them lying down and calm."
+    rag_tags: ["hypothermia", "first_aid"]
+    next: "monitor"
+
+  critical_core_rewarm:
+    id: "critical_core_rewarm"
+    type: "escalate"
+    message: "SEVERE HYPOTHERMIA SIGNS. Keep them flat and very still. Warm the core (chest/back/neck/groin) with body heat or warm packs wrapped in cloth. Do NOT warm arms/legs first. Do NOT massage. Monitor breathing continuously. Send someone for any available medical help."
+    critical: true
+
+  critical_unconscious:
+    id: "critical_unconscious"
+    type: "escalate"
+    message: "UNCONSCIOUS IN THE COLD. Handle gently and keep them flat. Check breathing for 10 seconds. If not breathing normally, start CPR. If breathing: keep airway open, insulate fully, and warm the core only. Monitor breathing every 30 seconds."
+    critical: true
+
+  monitor:
+    id: "monitor"
+    type: "instruction"
+    instruction: "Re-check every 5 minutes: shivering, alertness, speech, and breathing. If they become confused, stop shivering, or breathing slows, treat as severe hypothermia and keep warming the core."
+    rag_tags: ["hypothermia"]
+    terminal: true

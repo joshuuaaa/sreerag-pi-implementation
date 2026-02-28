@@ -8,7 +8,10 @@ import wave
 import subprocess
 import threading
 import os
+import logging
 from typing import Optional
+
+logger = logging.getLogger("hardware.audio")
 
 class AudioManager:
     def __init__(self, config: dict = None):
@@ -30,9 +33,9 @@ class AudioManager:
         self.audio: Optional[pyaudio.PyAudio] = None
         try:
             self.audio = pyaudio.PyAudio()
-            print("✅ Audio manager initialized")
+            logger.info("Audio manager initialized")
         except Exception as e:
-            print(f"❌ PyAudio initialization failed: {e}")
+            logger.error("PyAudio initialization failed: %s", e)
             
         # Recording state
         self.is_recording = False
@@ -52,10 +55,10 @@ class AudioManager:
             output_file: Path to save recording
         """
         if not self.audio or self.is_recording:
-            print("⚠️ Already recording or audio not available")
+            logger.warning("Already recording or audio not available")
             return
             
-        print(f"🎤 Recording to {output_file}")
+        logger.info("Recording to %s", output_file)
         
         self.recording_frames = []
         self.output_file = output_file
@@ -79,7 +82,7 @@ class AudioManager:
             self.recording_thread.start()
             
         except Exception as e:
-            print(f"❌ Recording start error: {e}")
+            logger.error("Recording start error: %s", e)
             self.is_recording = False
             
     def _record_loop(self):
@@ -93,17 +96,17 @@ class AudioManager:
                     )
                     self.recording_frames.append(data)
                 except Exception as e:
-                    print(f"❌ Recording read error: {e}")
+                    logger.error("Recording read error: %s", e)
                     break
         except Exception as e:
-            print(f"❌ Recording loop error: {e}")
+            logger.error("Recording loop error: %s", e)
             
     def stop_recording(self):
         """Stop recording and save to file"""
         if not self.is_recording:
             return
             
-        print("⏹️ Stopping recording")
+        logger.info("Stopping recording")
         self.is_recording = False
         
         # Wait for recording thread
@@ -126,11 +129,11 @@ class AudioManager:
                     wf.setsampwidth(self.audio.get_sample_size(self.format))
                     wf.setframerate(self.sample_rate)
                     wf.writeframes(b''.join(self.recording_frames))
-                print(f"✅ Recording saved to {self.output_file}")
+                logger.info("Recording saved to %s", self.output_file)
             except Exception as e:
-                print(f"❌ Error saving recording: {e}")
+                logger.error("Error saving recording: %s", e)
         else:
-            print("⚠️ No audio data to save")
+            logger.warning("No audio data to save")
             
     def play(self, audio_file: str):
         """
@@ -140,10 +143,10 @@ class AudioManager:
             audio_file: Path to audio file
         """
         if not os.path.exists(audio_file):
-            print(f"❌ Audio file not found: {audio_file}")
+            logger.error("Audio file not found: %s", audio_file)
             return
             
-        print(f"🔊 Playing {audio_file}")
+        logger.info("Playing %s", audio_file)
         
         try:
             # Use aplay (ALSA) for reliable playback on Pi
@@ -152,13 +155,13 @@ class AudioManager:
                 check=True,
                 timeout=30
             )
-            print("✅ Playback finished")
+            logger.info("Playback finished")
         except subprocess.TimeoutExpired:
-            print("⚠️ Playback timeout")
+            logger.warning("Playback timeout")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Playback error: {e}")
+            logger.error("Playback error: %s", e)
         except FileNotFoundError:
-            print("❌ aplay not found - install alsa-utils")
+            logger.error("aplay not found - install alsa-utils")
             
     def stop_playback(self):
         """Stop any ongoing playback"""
@@ -168,7 +171,7 @@ class AudioManager:
                 stderr=subprocess.DEVNULL,
                 timeout=1
             )
-            print("⏹️ Playback stopped")
+            logger.info("Playback stopped")
         except:
             pass
             
@@ -179,4 +182,4 @@ class AudioManager:
         self.stop_playback()
         if self.audio:
             self.audio.terminate()
-        print("🧹 Audio manager cleaned up")
+        logger.info("Audio manager cleaned up")

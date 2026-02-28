@@ -10,10 +10,13 @@ Gestures:
 """
 
 import time
+import logging
 from collections import deque
 from typing import Callable, Optional
 
 from gpiozero import Button as _GpioButton
+
+logger = logging.getLogger("hardware.button")
 
 
 class SmartButton:
@@ -51,7 +54,7 @@ class SmartButton:
         self._btn.when_pressed  = self._on_pressed
         self._btn.when_released = self._on_released
 
-        print(f"✅ Button initialized on GPIO {pin} (gpiozero/lgpio)")
+        logger.info("Button initialized on GPIO %s (gpiozero/lgpio)", pin)
 
     # ── internal handlers ─────────────────────────────────────────────────────
 
@@ -66,14 +69,14 @@ class SmartButton:
         if len(self._press_times) == 3:
             span = self._press_times[-1] - self._press_times[0]
             if span < self.triple_press_window:
-                print("🔄 TRIPLE PRESS DETECTED")
+                logger.info("Triple press detected")
                 self._press_times.clear()
                 self._is_pressed = False
                 if self.on_triple_press:
                     self.on_triple_press()
                 return
 
-        print("🔽 Button PRESSED")
+        logger.debug("Button pressed")
         if self.on_press_start:
             self.on_press_start()
 
@@ -85,7 +88,7 @@ class SmartButton:
         hold = time.time() - self._press_start
         self._is_pressed = False
 
-        print(f"🔼 Button RELEASED (held {hold:.2f}s)")
+        logger.debug("Button released (held %.2fs)", hold)
 
         if self.on_press_end:
             self.on_press_end(hold)
@@ -95,5 +98,5 @@ class SmartButton:
     def cleanup(self):
         """Release GPIO resources."""
         self._btn.close()
-        print("🧹 Button GPIO cleaned up")
+        logger.info("Button GPIO cleaned up")
 

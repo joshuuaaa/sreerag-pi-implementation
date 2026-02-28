@@ -1,0 +1,70 @@
+tree_id: postpartum_haemorrhage_protocol
+description: Postpartum haemorrhage (heavy bleeding after birth) field management
+start: root
+
+nodes:
+  root:
+    type: question
+    text: "Has the woman delivered a baby and is now bleeding heavily (soaking more than 1 pad in 5 minutes or visibly heavy flow)?"
+    options:
+      yes: uterine_massage
+      no: normal_bleeding
+
+  normal_bleeding:
+    type: action
+    text: "Normal post-birth bleeding. Keep the woman calm and warm. Encourage breastfeeding — this triggers uterine contraction and reduces bleeding. Monitor every 15 minutes."
+    next: monitor_pph
+
+  uterine_massage:
+    type: action
+    text: "Start UTERINE MASSAGE immediately. Place hand flat on lower abdomen above pubic bone. Massage firmly in circular motions until you feel the uterus firm up (like a cricket ball). Do NOT stop."
+    next: bladder_check
+
+  bladder_check:
+    type: action
+    text: "Ask the woman to urinate if possible — a full bladder prevents the uterus contracting. Continue uterine massage while she does so."
+    next: check_firming
+
+  check_firming:
+    type: question
+    text: "After 2 minutes of massage, has the uterus firmed up and bleeding reduced?"
+    options:
+      yes: breastfeed_encourage
+      no: continuous_bleed
+
+  breastfeed_encourage:
+    type: action
+    text: "Uterus firming. Encourage breastfeeding — stimulates oxytocin and helps maintain contraction. Keep massaging every 15 minutes. Monitor blood loss."
+    next: monitor_pph
+
+  continuous_bleed:
+    type: action
+    text: "Uterus not firming. Continue massage without interruption. If trained: attempt bimanual compression. If bleeding is uncontrollable: pack the vagina with clean cloth to apply pressure. Lay the woman flat."
+    next: shock_pph
+
+  shock_pph:
+    type: question
+    text: "Signs of shock: pale, cold, clammy skin, confusion, rapid breathing, very fast pulse?"
+    options:
+      yes: shock_treatment_pph
+      no: monitor_pph
+
+  shock_treatment_pph:
+    type: escalate
+    text: "Haemorrhagic shock. Keep flat, keep warm, do NOT give food or fluids. Continue uterine massage. Send someone for any available help IMMEDIATELY — postpartum haemorrhage kills within minutes."
+
+  monitor_pph:
+    type: question
+    text: "Is bleeding increasing or returning to heavy after slowing?"
+    options:
+      yes: recheck_massage
+      no: stable_pph
+
+  recheck_massage:
+    type: action
+    text: "Bleeding returning. Resume firm uterine massage immediately. Encourage breastfeeding. Reassess for shock. Send for any available medical help."
+    next: shock_pph
+
+  stable_pph:
+    type: action
+    text: "Bleeding controlled for now. Continue monitoring every 15 minutes. Uterus must remain firm — check regularly. Seek medical care as soon as reachable — ongoing risk of re-bleeding."

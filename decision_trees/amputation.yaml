@@ -1,0 +1,65 @@
+tree_id: amputation_protocol
+description: Traumatic amputation field management
+start: root
+
+nodes:
+  root:
+    type: question
+    text: "Is bleeding from the amputation site life-threatening (heavy, rapid blood loss)?"
+    options:
+      yes: apply_tourniquet
+      no: direct_pressure
+
+  apply_tourniquet:
+    type: action
+    text: "Apply tourniquet 2–3 inches ABOVE the amputation. Tighten until bleeding stops completely. Write the time on the skin. Do NOT remove once applied."
+    next: check_bleed_stopped
+
+  direct_pressure:
+    type: action
+    text: "Pack the wound tightly with clean cloth or gauze. Apply very firm direct pressure. Hold continuously for at least 10 minutes."
+    next: check_bleed_stopped
+
+  check_bleed_stopped:
+    type: question
+    text: "Has bleeding stopped or significantly slowed?"
+    options:
+      yes: preserve_part
+      no: tourniquet_needed
+
+  tourniquet_needed:
+    type: action
+    text: "Bleeding not controlled. Apply tourniquet now — 2–3 inches above wound, tighten until bleeding stops. Record the time."
+    next: preserve_part
+
+  preserve_part:
+    type: question
+    text: "Is the amputated part available?"
+    options:
+      yes: wrap_part
+      no: shock_prevention
+
+  wrap_part:
+    type: action
+    text: "Wrap the amputated part in clean moist cloth or gauze. Place in a clean plastic bag and seal. Keep cool — place the bag near ice or cold water but NOT directly on ice."
+    next: shock_prevention
+
+  shock_prevention:
+    type: action
+    text: "Treat for shock: lay flat, raise legs (unless other injuries prevent this), keep warm, do NOT give food or drink. Talk calmly."
+    next: monitor_amputation
+
+  monitor_amputation:
+    type: question
+    text: "Signs of shock: pale, cold, clammy skin, confusion, or very rapid breathing?"
+    options:
+      yes: shock_deteriorating
+      no: stable_amputation
+
+  shock_deteriorating:
+    type: escalate
+    text: "Shock developing. Maintain tourniquet, keep warm, keep flat. Send someone for any available help immediately. Do not remove tourniquet regardless of time."
+
+  stable_amputation:
+    type: action
+    text: "Bleeding controlled. Continue monitoring every 5 minutes. Keep the person warm and calm. Medical care is needed as soon as reachable — reimplantation may be possible within 6 hours if part is preserved."

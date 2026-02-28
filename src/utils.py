@@ -5,7 +5,10 @@ Utility functions
 
 import yaml
 import os
+import logging
 from pathlib import Path
+
+logger = logging.getLogger("utils")
 
 def load_config(config_path: str = "configs/pi_production.yaml") -> dict:
     """
@@ -20,13 +23,13 @@ def load_config(config_path: str = "configs/pi_production.yaml") -> dict:
     try:
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
-        print(f"✅ Config loaded from {config_path}")
+        logger.info("Config loaded from %s", config_path)
         return config
     except FileNotFoundError:
-        print(f"❌ Config file not found: {config_path}")
+        logger.error("Config file not found: %s", config_path)
         return {}
     except Exception as e:
-        print(f"❌ Config load error: {e}")
+        logger.error("Config load error: %s", e)
         return {}
 
 def ensure_dir(path: str):

@@ -1,0 +1,70 @@
+# decision_trees/smoke_inhalation.yaml
+
+tree_id: "smoke_inhalation_protocol"
+version: "1.0"
+description: "Smoke inhalation / carbon monoxide / airway irritation protocol"
+
+nodes:
+  root:
+    id: "root"
+    type: "question"
+    question: "Are they having severe trouble breathing, turning blue, or confused / passed out?"
+    critical: true
+    options:
+      - response_match: ["yes", "can't breathe", "blue", "confused", "passed out", "unconscious"]
+        next: "critical_airway"
+      - response_match: ["no", "breathing", "awake", "responsive"]
+        next: "fresh_air"
+
+  fresh_air:
+    id: "fresh_air"
+    type: "instruction"
+    instruction: "Move them to fresh air immediately. Get away from smoke source. Loosen tight clothing around neck and chest. Sit them upright or at 45 degrees to ease breathing."
+    rag_tags: ["smoke_inhalation", "airway"]
+    next: "soot_check"
+    critical: true
+
+  soot_check:
+    id: "soot_check"
+    type: "question"
+    question: "Do you see soot around the nose/mouth, hoarse voice, or burns in the face/mouth?"
+    options:
+      - response_match: ["yes", "soot", "hoarse", "burn", "singed", "face"]
+        next: "airway_swelling_warning"
+      - response_match: ["no", "none", "not sure"]
+        next: "monitor_co"
+
+  airway_swelling_warning:
+    id: "airway_swelling_warning"
+    type: "escalate"
+    message: "AIRWAY BURN RISK. Swelling can worsen fast. Keep them upright, calm, and in fresh air. Do NOT give food or drink. Monitor breathing constantly. If breathing worsens or they become drowsy, be ready for rescue breathing/CPR. Send someone for urgent medical help."
+    critical: true
+
+  monitor_co:
+    id: "monitor_co"
+    type: "question"
+    question: "Do they have headache, nausea, dizziness, or multiple people feel sick in the same area?"
+    options:
+      - response_match: ["yes", "headache", "nausea", "dizzy", "multiple", "everyone"]
+        next: "co_poisoning"
+      - response_match: ["no", "just cough", "okay"]
+        next: "supportive"
+
+  co_poisoning:
+    id: "co_poisoning"
+    type: "escalate"
+    message: "POSSIBLE CARBON MONOXIDE POISONING. Get everyone into fresh air NOW. Do not re-enter the area. Keep the person warm and resting. Monitor breathing every 2 minutes. Seek oxygen and medical care as soon as reachable."
+    critical: true
+
+  supportive:
+    id: "supportive"
+    type: "instruction"
+    instruction: "Keep them in fresh air and resting. Encourage slow breathing. Give small sips of water if fully alert. If wheezing, worsening cough, confusion, or fainting occurs, treat as critical and seek help as soon as possible."
+    rag_tags: ["smoke_inhalation"]
+    terminal: true
+
+  critical_airway:
+    id: "critical_airway"
+    type: "escalate"
+    message: "CRITICAL BREATHING PROBLEM. Move to fresh air. Open airway (tilt head back slightly). If not breathing normally, start CPR. If breathing but struggling, keep upright and calm. Send someone for urgent help now."
+    critical: true

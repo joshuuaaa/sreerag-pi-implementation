@@ -65,6 +65,9 @@ sudo reboot
 # Hardware mode (GPIO button required)
 python main.py
 
+# Optional: also stream logs to terminal (default keeps logs in file only)
+CRISIS_CONSOLE_LOGS=1 python main.py
+
 # Demo / dev mode (text input, no hardware needed)
 CRISIS_CONFIG=configs/dev.yaml python main.py
 
@@ -74,6 +77,8 @@ CRISIS_CONFIG=configs/dev.yaml CRISIS_TEXT_ONLY=1 python main.py
 # Fully offline run (no Hugging Face network calls)
 HF_HUB_OFFLINE=1 CRISIS_CONFIG=configs/dev.yaml CRISIS_TEXT_ONLY=1 python main.py
 ```
+
+The runtime now uses a clean terminal UI by default (`app.clean_terminal_ui: true`) and writes detailed logs to `logs/`.
 
 ### 4 – Run tests
 
