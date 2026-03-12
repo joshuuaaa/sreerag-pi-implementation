@@ -14,6 +14,66 @@ nodes:
         next: "assess_severity"
       - response_match: ["no", "unconscious", "not responsive", "passed out"]
         next: "escalate_unconscious"
+
+  # ── Open fracture complication branch ────────────────────────────────────
+  # Reached when the decision engine detects fracture as a secondary condition.
+  open_fracture_bleeding:
+    id: "open_fracture_bleeding"
+    type: "instruction"
+    instruction: "OPEN FRACTURE WITH BLEEDING — do NOT press directly on the bone or any protruding tissue. Apply gentle pressure with a clean cloth around the wound edges only, not over the bone. Cover the wound loosely — do NOT push the bone back in. Keep the limb completely still and supported in the position found."
+    rag_tags: ["fracture", "open_fracture", "bleeding", "wound_care"]
+    next: "fracture_bleed_check"
+    critical: true
+
+  fracture_bleed_check:
+    id: "fracture_bleed_check"
+    type: "question"
+    question: "Is the bleeding slowing with gentle pressure around the wound edges?"
+    options:
+      - response_match: ["yes", "slowing", "less", "stopping", "controlled", "better"]
+        next: "fracture_bleed_stable"
+      - response_match: ["no", "still bleeding", "heavy", "worse", "not stopping"]
+        next: "escalate_severe"
+
+  fracture_bleed_stable:
+    id: "fracture_bleed_stable"
+    type: "instruction"
+    instruction: "Good. Maintain gentle pressure around — not on — the wound. Keep the limb still. Watch for signs of shock: pale skin, rapid breathing, confusion, cold clammy skin."
+    rag_tags: ["fracture", "shock_prevention"]
+    terminal: true
+
+  # ── Chest wound complication branch ────────────────────────────────────
+  # Reached when decision engine detects chest_injury as secondary condition.
+  chest_wound_bleeding:
+    id: "chest_wound_bleeding"
+    type: "instruction"
+    instruction: "CHEST WOUND WITH BLEEDING — Do NOT seal tightly with direct pressure. Cover the wound with any non-porous material (plastic, foil, clean packaging). Tape THREE sides only — leave the bottom edge open so air can escape. This prevents tension pneumothorax. Monitor breathing closely."
+    rag_tags: ["chest_injury", "bleeding", "wound_care", "pneumothorax"]
+    next: "chest_wound_check"
+    critical: true
+
+  chest_wound_check:
+    id: "chest_wound_check"
+    type: "question"
+    question: "After covering, is breathing getting WORSE — more difficulty, skin turning blue, or neck veins becoming visible?"
+    options:
+      - response_match: ["yes", "worse", "blue", "harder", "struggling", "can't breathe"]
+        next: "lift_seal"
+      - response_match: ["no", "same", "better", "okay", "stable", "improving"]
+        next: "chest_wound_stable"
+
+  lift_seal:
+    id: "lift_seal"
+    type: "escalate"
+    message: "TENSION PNEUMOTHORAX RISK. Lift the unsealed edge of the covering immediately to release trapped air. Keep lifting and re-sealing in short bursts. This is life-threatening — send for any available help now and do not leave the person."
+    critical: true
+
+  chest_wound_stable:
+    id: "chest_wound_stable"
+    type: "instruction"
+    instruction: "Good. Keep the 3-sided seal in place. Sit the person upright or slightly leaning toward the injured side. Check breathing every 2 minutes. Watch for the seal lifting in or out with breaths."
+    rag_tags: ["chest_injury", "monitoring"]
+    terminal: true
         
   assess_severity:
     id: "assess_severity"

@@ -1,3 +1,4 @@
+import hashlib
 import os
 import re
 import shutil
@@ -6,7 +7,25 @@ import threading
 import time
 from collections import deque
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
+
+# ── Pi CPU temperature ────────────────────────────────────────────────────────
+_TEMP_PATH = Path("/sys/class/thermal/thermal_zone0/temp")
+
+def _read_pi_temp() -> Optional[float]:
+    """Return CPU temp in °C, or None if unavailable."""
+    try:
+        return int(_TEMP_PATH.read_text().strip()) / 1000.0
+    except Exception:
+        return None
+
+def _temp_color(temp: float) -> str:
+    if temp >= 75:
+        return FG_BR_RED
+    if temp >= 60:
+        return FG_BR_YEL
+    return FG_BR_GRN
 
 # ── ANSI helpers ──────────────────────────────────────────────────────────────
 R   = "\x1b[0m"       # reset
@@ -114,8 +133,48 @@ class TerminalUI:
         self._spinner_idx   = 0
         self._spinner_timer: threading.Timer | None = None
         self._last_render   = 0.0
+        self._last_content_hash = ""
+
+        # Pi temperature — polled every 5 s in background
+        self._cpu_temp: Optional[float] = None
+        self._prev_cpu_temp: Optional[float] = None
+        self._temp_timer: threading.Timer | None = None
+        self._poll_temp()
+
+    # ── temperature polling ───────────────────────────────────────────────────
+
+    def _poll_temp(self):
+        self._cpu_temp = _read_pi_temp()
+        # Only redraw if temperature value actually changed
+        if self._cpu_temp != self._prev_cpu_temp:
+            self._prev_cpu_temp = self._cpu_temp
+            self.render(force=True)
+        self._temp_timer = threading.Timer(5.0, self._poll_temp)
+        self._temp_timer.daemon = True
+        self._temp_timer.start()
+
+    def _temp_display(self) -> str:
+        """Return coloured temperature string, or empty string if unavailable."""
+        if self._cpu_temp is None:
+            return ""
+        color = _temp_color(self._cpu_temp)
+        warn  = " ⚠" if self._cpu_temp >= 75 else ""
+        return f"{color}{B}{self._cpu_temp:.0f}°C{warn}{R}"
 
     # ── public API ────────────────────────────────────────────────────────────
+
+    def _content_hash(self) -> str:
+        """Hash of all displayed content except spinner index and clock."""
+        raw = "|".join([
+            self._status,
+            self._user_text,
+            self._asst_text,
+            self._hint,
+            self._pipeline,
+            str(self._cpu_temp),
+            "".join(re.sub(r"\x1b\[[0-9;]*m", "", e) for e in self._log),
+        ])
+        return hashlib.md5(raw.encode()).hexdigest()
 
     def set_status(self, status: str):
         self._status = status or ""
@@ -127,30 +186,30 @@ class TerminalUI:
             self._start_spinner()
         else:
             self._stop_spinner()
-        self.render()
+        self.render(force=True)
 
     def set_user_text(self, text: str):
         self._user_text = (text or "").strip()
-        self.render()
+        self.render(force=True)
 
     def set_assistant_text(self, text: str):
         self._asst_text = (text or "").strip()
-        self.render()
+        self.render(force=True)
 
     def set_hint(self, hint: str):
         self._hint = hint or ""
-        self.render()
+        self.render(force=True)
 
     def add_log(self, message: str):
         """Append a timestamped entry to the activity log."""
         ts = datetime.now().strftime("%H:%M")
         self._log.append(f"{DIM}{ts}{R} {message}")
-        self.render()
+        self.render(force=True)
 
     def set_pipeline_stage(self, stage: str):
         """Manually override the pipeline stage label."""
         self._pipeline = stage
-        self.render()
+        self.render(force=True)
 
     # ── rendering ─────────────────────────────────────────────────────────────
 
@@ -165,11 +224,14 @@ class TerminalUI:
             return min(detected, self._max_cols)
         return detected
 
-    def render(self):
+    def render(self, force: bool = False):
         if not self.enabled:
             return
         with self._lock:
-            self._render_locked()
+            h = self._content_hash()
+            if force or h != self._last_content_hash:
+                self._last_content_hash = h
+                self._render_locked()
 
     def _render_locked(self):
         cols    = self._effective_cols()
@@ -199,7 +261,9 @@ class TerminalUI:
             short_title = self.title.replace("Crisis Assistant", "Crisis Asst")
             title_str   = f"{B}{FG_BR_WHT}{short_title}{R}"
             status_str  = f"{color}{B}{self._status}{R}"
-            header_body = f"{title_str} {DIM}│{R} {color}{spin}{R} {status_str}"
+            temp_str    = self._temp_display()
+            temp_part   = f" {DIM}│{R} {temp_str}" if temp_str else ""
+            header_body = f"{title_str} {DIM}│{R} {color}{spin}{R} {status_str}{temp_part}"
             lines.append(f"╔{'═' * (width - 2)}╗")
             lines.append(self._row(header_body, inner))
 
@@ -252,11 +316,13 @@ class TerminalUI:
             title_str = f"{B}{FG_BR_WHT}{self.title}{R}"
             ts_str    = f"{DIM}{datetime.now().strftime('%H:%M:%S')}{R}"
             spin_pad  = f" {spin} "
+            temp_str  = self._temp_display()
+            right_str = f"{temp_str}  {ts_str}" if temp_str else ts_str
 
             lines.append(f"╔{'═' * (width - 2)}╗")
             lines.append(self._row(
                 f"{title_str}  {DIM}│{R}  {color}{spin_pad}{self._status}{R}",
-                inner, right=ts_str,
+                inner, right=right_str,
             ))
 
             if pipeline:
@@ -293,7 +359,11 @@ class TerminalUI:
             lines.append(self._row(f"  {DIM}{hint_text}{R}", inner, raw=True))
             lines.append(f"╚{'═' * (width - 2)}╝")
 
-        screen = "\x1b[2J\x1b[H" + "\n".join(lines) + "\n"
+        # \x1b[H  — cursor home (no screen clear = no flash)
+        # \x1b[K  — erase to end of line on each row (overwrites leftover chars)
+        # \x1b[J  — erase from cursor to end of screen (clears stale lines if
+        #           the new frame is shorter than the previous one)
+        screen = "\x1b[H" + "\n".join(line + "\x1b[K" for line in lines) + "\x1b[J\n"
         os.write(1, screen.encode("utf-8", errors="ignore"))
         self._last_render = time.time()
 
@@ -301,6 +371,8 @@ class TerminalUI:
         if not self.enabled:
             return
         self._stop_spinner()
+        if self._temp_timer:
+            self._temp_timer.cancel()
         os.write(1, b"\x1b[2J\x1b[H")
 
     # ── spinner ───────────────────────────────────────────────────────────────
@@ -314,8 +386,11 @@ class TerminalUI:
         if not self.enabled:
             return
         self._spinner_idx = (self._spinner_idx + 1) % len(_SPINNER)
-        with self._lock:
-            self._render_locked()
+        # Throttle spinner redraws to max 2 fps — avoids constant screen flicker
+        now = time.time()
+        if now - self._last_render >= 0.5:
+            with self._lock:
+                self._render_locked()
         if self._status in _ACTIVE_STATES:
             self._spinner_timer = threading.Timer(0.1, self._tick_spinner)
             self._spinner_timer.daemon = True

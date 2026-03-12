@@ -105,97 +105,124 @@ class IntelligentOrchestrator:
         
         return response
         
+    def _llm_respond(self, situation: str, task: str, max_tokens: int = 100) -> str:
+        """Minimal LLM call with situation context and a task instruction."""
+        # Inject any active contraindication warnings even on short LLM calls
+        if self.current_session and self.current_session.analysis:
+            analysis = self.current_session.analysis
+            primary = analysis.get("primary_condition", "")
+            secondary_types = [c["type"] for c in analysis.get("conditions", [])[1:]]
+            _CONTRAINDICATIONS = {
+                ("bleeding", "fracture"): "COMPLICATION: open fracture. Do NOT instruct direct pressure over bone. Gentle pressure around edges only. Immobilise limb.",
+                ("bleeding", "chest_injury"): "COMPLICATION: open chest wound. Do NOT apply solid direct pressure — 3-sided seal only.",
+                ("bleeding", "head_injury"): "COMPLICATION: head injury. Do NOT tilt head/neck. Pressure around skull only, not over deformity.",
+                ("burn", "smoke_inhalation"): "COMPLICATION: smoke inhalation. Airway is absolute priority before burn treatment. Move to fresh air first.",
+                ("smoke_inhalation", "burn"): "COMPLICATION: burns present. Treat airway first, cool burn only once breathing stable.",
+                ("drowning", "hypothermia"): "COMPLICATION: cold-water drowning. Do NOT stop CPR — continue until rewarmed. Remove wet clothes.",
+                ("head_injury", "seizure"): "COMPLICATION: seizure after head injury is serious. Do NOT restrain. Protect head. Recovery position after seizure stops.",
+                ("shock", "fracture"): "COMPLICATION: fracture likely causing internal blood loss. Immobilise limb immediately. Do NOT let person stand.",
+            }
+            for sec in secondary_types:
+                warning = _CONTRAINDICATIONS.get((primary, sec))
+                if warning:
+                    situation = f"\u26a0\ufe0f {warning}\n{situation}"
+                    break
+        content = f"{situation}\n\n{task}"
+        response = self.llm.generate_chat(
+            system_prompt=self.system_prompt,
+            messages=[{"role": "user", "content": content}],
+            max_tokens=max_tokens,
+        )
+        return response.strip() if response and len(response.strip()) >= 5 else ""
+
     def _handle_initial_assessment(self, message: str, analysis: Dict) -> Dict[str, Any]:
         """Handle first message - understand situation"""
-        
+
         if not analysis["conditions"]:
-            # Unclear situation
-            return {
-                "response": "I'm here to help. Can you describe what's wrong? Is someone injured?",
-                "lcd_display": "Need details",
-                "state": "assessing"
-            }
-        
-        # Conditions detected - check critical info
-        primary = analysis["primary_condition"]
-        
+            resp = self._llm_respond(
+                situation=f'Person said: "{message}"\nNo clear emergency detected yet.',
+                task="Required question to ask: Can you describe what happened? Is someone injured or unwell?",
+            ) or "Can you describe what happened? Is someone injured?"
+            return {"response": resp, "lcd_display": "Need details", "state": "assessing"}
+
+        primary  = analysis["primary_condition"]
+        severity = analysis["conditions"][0].get("severity", "") if analysis["conditions"] else ""
+
         if "patient_conscious" not in analysis["context"]:
-            return {
-                "response": f"I understand there's a {primary} situation. First, is the person conscious and breathing?",
-                "lcd_display": "Check conscious",
-                "state": "assessing"
-            }
-        
-        # Move to confirmation
+            resp = self._llm_respond(
+                situation=f'Person said: "{message}"\nDetected: {primary} ({severity}).',
+                task="Required question to ask: Is the person conscious and breathing?",
+            ) or f"Okay — {primary}. Is the person conscious and breathing?"
+            return {"response": resp, "lcd_display": "Check conscious", "state": "assessing"}
+
         return self._handle_confirmation(message, analysis)
-        
+
     def _handle_clarification(self, message: str, analysis: Dict) -> Dict[str, Any]:
         """Ask clarifying questions"""
-        
-        # Simple clarification
-        return {
-            "response": "I need more information. What exactly happened? Who is affected?",
-            "lcd_display": "Clarifying",
-            "state": "assessing"
-        }
-        
+        resp = self._llm_respond(
+            situation=f'Person said: "{message}"\nSituation unclear.',
+            task="Required question to ask: What exactly happened and who is affected?",
+        ) or "I need a bit more detail — what exactly happened?"
+        return {"response": resp, "lcd_display": "Clarifying", "state": "assessing"}
+
     def _handle_confirmation(self, message: str, analysis: Dict) -> Dict[str, Any]:
         """Confirm conditions and prioritize"""
-        
+
         conditions = analysis["conditions"]
         if not conditions:
             return self._handle_clarification(message, analysis)
-            
-        primary = conditions[0]
-        
-        # Check for multiple serious conditions
+
         if len(conditions) > 1:
             cond1 = conditions[0]["type"]
             cond2 = conditions[1]["type"]
-            return {
-                "response": f"I see {cond1} and {cond2}. I'll guide you through the {cond1} first. Are you ready?",
-                "lcd_display": f"{cond1}+more",
-                "state": "confirming"
+            # If this pair has a known clinical contraindication, skip the
+            # "ready?" confirmation and jump straight to guided treatment —
+            # that triggers both the decision-tree complication branch and
+            # the LLM contraindication warning injection.
+            _DANGEROUS_PAIRS = {
+                ("bleeding", "fracture"), ("bleeding", "chest_injury"),
+                ("bleeding", "head_injury"), ("burn", "smoke_inhalation"),
+                ("smoke_inhalation", "burn"), ("drowning", "hypothermia"),
+                ("head_injury", "seizure"), ("shock", "fracture"),
             }
-        
-        # Single condition - move to guidance
+            if (cond1, cond2) in _DANGEROUS_PAIRS:
+                return self._handle_guidance(message, analysis)
+            resp = self._llm_respond(
+                situation=f'Person said: "{message}"\nTwo emergencies: {cond1} and {cond2}.',
+                task=f"Required question: I'll guide you through {cond1} first — are you ready?",
+            ) or f"I can see two issues — {cond1} and {cond2}. I'll take you through {cond1} first. Ready?"
+            return {"response": resp, "lcd_display": f"{cond1}+more", "state": "confirming"}
+
         return self._handle_guidance(message, analysis)
         
     def _handle_guidance(self, message: str, analysis: Dict) -> Dict[str, Any]:
-        """Provide step-by-step guidance"""
-        
+        """Provide step-by-step guidance driven by decision tree, delivered by LLM."""
+
         primary_condition = analysis["primary_condition"]
-        
+
         if not primary_condition:
             return {
                 "response": "Tell me what's happening so I can help you properly.",
                 "lcd_display": "Assessing",
                 "state": "assessing"
             }
-        
-        # Check for critical situations
-        if self._is_critical(analysis):
-            primary = analysis.get("primary_condition", "emergency")
-            decision_result = self.decision.navigate(
-                emergency_type=primary,
-                session=self.current_session,
-                user_response=message
-            )
-            return {
-                "response": decision_result.get("message", 
-                    "This is life-threatening. Act now: check airway, control bleeding, treat for shock. Send someone for any available help."),
-                "lcd_display": "CRITICAL",
-                "state": "critical"
-            }
-        
-        # Get decision tree guidance
+
+        # Navigate decision tree — pass secondary conditions so the engine
+        # can detect contraindications (e.g. fracture + bleeding = no direct pressure)
+        secondary = [c["type"] for c in analysis["conditions"][1:]] if analysis["conditions"] else []
         decision_result = self.decision.navigate(
             emergency_type=primary_condition,
             session=self.current_session,
-            user_response=message
+            user_response=message,
+            secondary_conditions=secondary,
         )
-        
-        # Get RAG context if available
+
+        action        = decision_result.get("action", "instruct")
+        step_text     = decision_result.get("message", "")
+        next_question = decision_result.get("next_question")
+        is_critical   = decision_result.get("critical", False) or self._is_critical(analysis)
+
+        # RAG context for instruction nodes
         rag_context = ""
         if decision_result.get("rag_tags"):
             rag_docs = self.rag.retrieve(
@@ -205,67 +232,146 @@ class IntelligentOrchestrator:
             )
             if rag_docs:
                 rag_context = "\n".join([doc["content"][:200] for doc in rag_docs])
-        
-        # Build context-aware LLM prompt
+
         response_text = self._generate_response(
             user_message=message,
-            decision_guidance=decision_result["message"],
+            action=action,
+            step_text=step_text,
+            next_question=next_question,
             rag_context=rag_context,
-            analysis=analysis
+            analysis=analysis,
         )
-        
-        return {
-            "response": response_text,
-            "lcd_display": primary_condition[:12],
-            "state": "guiding"
-        }
-        
-    def _generate_response(self, user_message: str, decision_guidance: str,
-                          rag_context: str, analysis: Dict) -> str:
-        """Generate LLM response using Phi-3 chat interface."""
 
-        primary  = analysis.get("primary_condition", "emergency")
-        severity = ""
-        if analysis.get("conditions"):
-            severity = analysis["conditions"][0].get("severity", "")
+        state = "critical" if is_critical else "guiding"
+        lcd   = "CRITICAL" if is_critical else primary_condition[:12]
+        return {"response": response_text, "lcd_display": lcd, "state": state}
+        
+    def _generate_response(self, user_message: str, action: str,
+                           step_text: str, next_question: Optional[str],
+                           rag_context: str, analysis: Dict) -> str:
+        """LLM delivers the decision tree step naturally, grounded in situation analysis."""
 
+        primary   = analysis.get("primary_condition", "emergency")
+        severity  = analysis["conditions"][0].get("severity", "") if analysis.get("conditions") else ""
         conscious = analysis["context"].get("patient_conscious", "unknown")
 
-        # Build structured user message for the current turn
-        context_block = (
-            f"Emergency type: {primary}\n"
-            f"Severity: {severity}\n"
-            f"Patient conscious: {conscious}\n\n"
+        situation = (
+            f'Situation: {primary}, severity: {severity}, patient conscious: {conscious}.\n'
+            f'Person just said: "{user_message}"'
         )
+
+        # ── Clinical contraindication warnings ───────────────────────────────
+        # Keyed as (primary, secondary) → warning injected into LLM situation.
+        # Prevents the LLM from giving advice that is correct in isolation but
+        # dangerous when a second condition is also present.
+        _CONTRAINDICATIONS = {
+            ("bleeding", "fracture"): (
+                "⚠️ COMPLICATION: open fracture at wound site. "
+                "Do NOT apply direct firm pressure over bone or protruding tissue. "
+                "Apply gentle pressure AROUND the wound edges only. "
+                "Immobilise the limb in the position found. Do NOT push bone back in."
+            ),
+            ("bleeding", "chest_injury"): (
+                "⚠️ COMPLICATION: chest injury present. "
+                "If there is an open chest wound, do NOT seal it with a solid dressing — "
+                "use a 3-sided occlusive seal (tape 3 sides only, leave 1 open). "
+                "Do NOT apply firm direct pressure to a sucking chest wound."
+            ),
+            ("bleeding", "head_injury"): (
+                "⚠️ COMPLICATION: head injury also present. "
+                "Do NOT tilt or move the head or neck to access the wound. "
+                "Apply gentle pressure AROUND — not directly over — any skull deformity. "
+                "Keep the person completely still."
+            ),
+            ("bleeding", "fracture"): (  # also covers spinal via fracture tree
+                "⚠️ COMPLICATION: possible spinal/fracture injury. "
+                "Do NOT reposition the patient to control bleeding. "
+                "Apply pressure from the current position only. Keep spine neutral."
+            ),
+            ("burn", "smoke_inhalation"): (
+                "⚠️ COMPLICATION: smoke inhalation present. "
+                "Airway is the absolute priority — check for singed nose hairs, "
+                "hoarse voice, or stridor BEFORE treating the burn. "
+                "Move to fresh air first if not already done."
+            ),
+            ("smoke_inhalation", "burn"): (
+                "⚠️ COMPLICATION: burns also present. "
+                "Treat the airway first. Only cool burns once the person is in "
+                "fresh air and breathing is stable."
+            ),
+            ("drowning", "hypothermia"): (
+                "⚠️ COMPLICATION: hypothermia with drowning. "
+                "Do NOT assume death — cold-water drowning victims can survive "
+                "prolonged submersion. Continue CPR until the patient is rewarmed. "
+                "Remove wet clothing and insulate while continuing CPR."
+            ),
+            ("head_injury", "seizure"): (
+                "⚠️ COMPLICATION: seizure following head injury — this is serious. "
+                "Do NOT restrain seizure movements. Protect the head from further impact. "
+                "Keep the airway open; place in recovery position after seizure stops."
+            ),
+            ("shock", "fracture"): (
+                "⚠️ COMPLICATION: fracture (possible femur) may be causing internal "
+                "blood loss driving the shock. Immobilise the fractured limb immediately "
+                "to reduce internal bleeding. Do NOT let the person stand or walk."
+            ),
+            ("cpr", "fracture"): (
+                "⚠️ NOTE: rib fractures may occur during CPR — this is expected and "
+                "acceptable. Do NOT stop CPR because of cracking sounds or suspected "
+                "rib fracture. Continue compressions at full depth."
+            ),
+        }
+
+        secondary_types = [c["type"] for c in analysis.get("conditions", [])[1:]]
+        for sec in secondary_types:
+            warning = _CONTRAINDICATIONS.get((primary, sec))
+            if warning:
+                situation += f"\n{warning}"
+                break  # one warning per turn keeps the prompt focused
 
         if rag_context:
-            context_block += f"Medical reference:\n{rag_context}\n\n"
+            situation += f"\nMedical reference (use only if helpful): {rag_context[:300]}"
 
-        context_block += (
-            f"Recommended protocol step:\n{decision_guidance}\n\n"
-            f"User said: {user_message}"
-        )
+        # Tell LLM exactly what to deliver this turn
+        if action == "ask":
+            task = (
+                f"Acknowledge what they said briefly, then ask this question naturally:\n"
+                f"{step_text}"
+            )
+        else:  # instruct / action / escalate
+            task = (
+                f"Acknowledge what they said briefly, then give this instruction naturally:\n"
+                f"{step_text}"
+            )
+            if next_question:
+                task += (
+                    f"\nThen end your response by asking this follow-up question naturally:\n"
+                    f"{next_question}"
+                )
 
-        # Assemble chat history (last 3 turns) + current user turn
+        # Include last 2 turns for continuity (fewer turns → less multi-turn drift)
         messages = []
         if self.current_session:
-            for msg in self.current_session.get_context(last_n=3):
+            for msg in self.current_session.get_context(last_n=2):
                 messages.append({"role": msg["role"], "content": msg["content"]})
 
-        # Replace last user message with enriched context version
+        content = f"{situation}\n\n{task}"
         if messages and messages[-1]["role"] == "user":
-            messages[-1]["content"] = context_block
+            messages[-1]["content"] = content
         else:
-            messages.append({"role": "user", "content": context_block})
+            messages.append({"role": "user", "content": content})
 
         response = self.llm.generate_chat(
             system_prompt=self.system_prompt,
             messages=messages,
-            max_tokens=200,
+            max_tokens=75,
         )
 
         if not response or len(response.strip()) < 5:
-            response = decision_guidance
+            # Fallback: raw step + question
+            response = step_text
+            if next_question:
+                response += f" {next_question}"
 
         return response
         

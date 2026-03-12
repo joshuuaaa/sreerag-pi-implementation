@@ -32,6 +32,10 @@ _PHI3_STOP = [
     "\nUser:", "\nuser:", "\nHuman:", "\nhuman:",
     "\nPerson:", "\nperson:", "\nSupport:", "\nsupport:",
     "\nPatient:", "\npatient:", "\nYou:",
+    # Prevent fake dialogue separators and labelled user replies
+    "\n===", "===",
+    "\nResponse:", "Response:",
+    "\nReply:", "Reply:",
 ]
 
 
@@ -179,15 +183,22 @@ class LLMEngine:
         for tok in _PHI3_STOP:
             text = text.replace(tok, "")
         # Cut off anything that looks like a simulated user/patient reply
-        # e.g. "support: Yes...", "User: I'm doing it", "Patient: okay"
+        # e.g. "support: Yes...", "User: I'm doing it", "Response: okay"
         text = re.split(
-            r"(?i)\b(user|human|person|patient|support|you)\s*:",
+            r"(?i)\b(user|human|person|patient|support|you|response|reply)\s*:",
             text,
         )[0]
+        # Strip === fake turn dividers and everything after them
+        text = re.split(r"={3,}", text)[0]
         # Collapse multiple newlines / spaces
         text = re.sub(r"\n{2,}", " ", text)
         text = re.sub(r" {2,}", " ", text)
-        return text.strip()
+        text = text.strip()
+        # Hard ceiling: keep at most 4 sentences to prevent multi-turn runaway
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        if len(sentences) > 4:
+            text = " ".join(sentences[:4])
+        return text
 
     @staticmethod
     def _fallback() -> str:

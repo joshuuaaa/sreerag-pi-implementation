@@ -48,18 +48,26 @@ class DecisionEngine:
         else:
             logger.warning("No decision trees loaded")
             
-    def navigate(self, emergency_type: str, session, user_response: str = None) -> Dict[str, Any]:
+    def navigate(
+        self,
+        emergency_type: str,
+        session,
+        user_response: str = None,
+        secondary_conditions: list = None,
+    ) -> Dict[str, Any]:
         """
-        Navigate decision tree based on conversation state
-        
+        Navigate decision tree based on conversation state.
+
         Args:
-            emergency_type: Type of emergency (bleeding, burn, etc.)
-            session: Current conversation session
-            user_response: User's latest response
-            
+            emergency_type:       Type of emergency (bleeding, burn, etc.)
+            session:              Current conversation session
+            user_response:        User's latest response
+            secondary_conditions: Other detected condition types (e.g. ['fracture'])
+
         Returns:
             Dictionary with action, message, tags, etc.
         """
+        secondary_conditions = secondary_conditions or []
         # Get tree for emergency type
         tree = self.trees.get(emergency_type)
         if not tree:
@@ -76,10 +84,30 @@ class DecisionEngine:
         start_node = tree.get("start", "root")
         current_node_id = session.protocol_state.get("current_node", start_node)
         current_node = nodes.get(current_node_id, nodes.get(start_node, nodes.get("root")))
-        
+
         if not current_node:
             return self._fallback_response()
-        
+
+        # ── Contraindication check ────────────────────────────────────────────
+        # When the primary tree's default nodes would give harmful instructions
+        # due to a secondary condition, divert to a complication-specific branch.
+        _PRESSURE_NODES = {
+            start_node, "root", "assess_severity", "severe_bleeding",
+            "moderate_bleeding", "find_materials",
+        }
+        if emergency_type == "bleeding" and not session.protocol_state.get("complication_checked"):
+            session.update_protocol_state("complication_checked", True)
+            if "fracture" in secondary_conditions and "open_fracture_bleeding" in nodes \
+                    and current_node_id in _PRESSURE_NODES:
+                session.update_protocol_state("current_node", "open_fracture_bleeding")
+                current_node_id = "open_fracture_bleeding"
+                current_node = nodes["open_fracture_bleeding"]
+            elif "chest_injury" in secondary_conditions and "chest_wound_bleeding" in nodes \
+                    and current_node_id in _PRESSURE_NODES:
+                session.update_protocol_state("current_node", "chest_wound_bleeding")
+                current_node_id = "chest_wound_bleeding"
+                current_node = nodes["chest_wound_bleeding"]
+
         # If user just responded, find next node
         if user_response and current_node.get("type") == "question":
             next_node_id = self._find_next_node(current_node, user_response)
@@ -121,11 +149,11 @@ class DecisionEngine:
             next_id = current_node.get("next")
             next_node = nodes.get(next_id) if next_id else None
 
+            # Keep the next question separate — the orchestrator appends it
+            # directly to the response WITHOUT passing it through the LLM
+            next_question = None
             if next_node and next_node.get("type") == "question":
-                # Append follow-up question so the user knows what to answer next
-                follow_up = next_node.get("question") or next_node.get("text", "")
-                if follow_up:
-                    message = f"{message}\n\n{follow_up}"
+                next_question = next_node.get("question") or next_node.get("text")
                 session.update_protocol_state("current_node", next_id)
             elif next_id and not current_node.get("terminal", False):
                 session.update_protocol_state("current_node", next_id)
@@ -134,6 +162,7 @@ class DecisionEngine:
             return {
                 "action": "instruct",
                 "message": message,
+                "next_question": next_question,
                 "rag_tags": current_node.get("rag_tags", []),
                 "next_node_id": next_id,
                 "completed": current_node.get("terminal", False),
